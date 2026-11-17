@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, FileText, Globe, Layers, ExternalLink } from 'lucide-react';
 import { Item } from '../types';
+import { sanitizeDisplay } from '../utils/text';
 
 interface ItemDetailModalProps {
   item: Item | null;
@@ -86,7 +87,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({ item, onClose 
               </span>
             </div>
             <div className="p-4 rounded-lg bg-black/30 border border-white/5 text-xs text-slate-300 leading-relaxed font-sans whitespace-pre-wrap select-text">
-              {item.raw_content}
+              {sanitizeDisplay(item.raw_content)}
             </div>
           </div>
 

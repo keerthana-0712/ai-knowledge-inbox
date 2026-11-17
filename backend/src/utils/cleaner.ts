@@ -1,59 +1,70 @@
 /**
- * Cleans extracted web content and pseudo-JSX/XML tags (e.g. from ChatGPT shared chats,
- * documentation frameworks, or CMS systems) so that content represents pure, readable text
- * and standard markdown exactly as seen by a user in their browser.
+ * Strict content sanitizer:
+ * Ensures all extracted web content and notes are strictly human-readable prose
+ * and standard markdown. Strips all HTML/XML/JSX code tags, component wrappers,
+ * CSS artifacts, attributes, and unrendered framework code so the user NEVER sees
+ * code from links.
  */
 export function cleanExtractedText(raw: string): string {
   if (!raw) return '';
 
   let text = raw;
 
-  // 1. Remove citations / file references like <FileCite ref_id="..."/>
+  // 1. Decode HTML entities
+  text = text
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>');
+
+  // 2. Remove script, style, and iframe blocks completely
+  text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  text = text.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+  text = text.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+
+  // 3. Remove citations / file references like <FileCite .../>
   text = text.replace(/<FileCite[^>]*\/>/gi, '');
   text = text.replace(/<FileCite[^>]*>.*?<\/FileCite>/gi, '');
 
-  // 2. Convert UI badge elements: <badge color="...">Completed</badge> -> [Completed]
+  // 4. Convert UI badge elements: <badge color="...">Completed</badge> -> [Completed]
   text = text.replace(/<badge[^>]*>(.*?)<\/badge>/gi, '[$1]');
 
-  // 3. Convert formatted text wrapper tags: <text ...>content</text> -> content
+  // 5. Convert formatted text wrapper tags: <text ...>content</text> -> content
   text = text.replace(/<text[^>]*>(.*?)<\/text>/gi, '$1');
 
-  // 4. Remove structural pseudo-JSX layout tags: <box ...>, </box>, <row ...>, </row>, <column ...>, </column>
-  text = text.replace(/<\/?(box|row|col|column)[^>]*>/gi, '');
+  // 6. Convert structural breaks and paragraphs to clean line breaks
+  text = text.replace(/<\/?(br|p|div|tr|hr|divider)\s*\/?>/gi, '\n');
+  text = text.replace(/<\/?(h[1-6])\s*>/gi, '\n\n');
+  text = text.replace(/<li\s*>/gi, '\n• ');
 
-  // 5. Convert divider tags: <divider .../> -> ---
-  text = text.replace(/<divider[^>]*\/?>/gi, '\n---\n');
+  // 7. Convert links <a href="...">text</a> to text
+  text = text.replace(/<a\b[^>]*>(.*?)<\/a>/gi, '$1');
 
-  // 6. Strip any remaining non-standard HTML / XML tags with attributes (e.g. <custom-tag prop="val">)
-  text = text.replace(/<([a-zA-Z0-9_-]+)(?:\s+[^>]*)?>/g, (match, tagName) => {
-    // Keep basic semantic HTML formatting tags if needed, otherwise strip
-    if (/^(b|strong|i|em|u|code|pre|a|p|br|hr|h[1-6])$/i.test(tagName)) {
-      return match;
-    }
-    return '';
-  });
-  text = text.replace(/<\/([a-zA-Z0-9_-]+)>/g, (match, tagName) => {
-    if (/^(b|strong|i|em|u|code|pre|a|p|h[1-6])$/i.test(tagName)) {
-      return match;
-    }
-    return '';
-  });
+  // 8. STRIP ALL REMAINING HTML / XML / JSX / COMPONENT TAGS
+  // Matches any <tag>, </tag>, <tag attr="val">, <tag attr={val} />
+  text = text.replace(/<\/?[a-zA-Z][a-zA-Z0-9_\-:]*(?:\s+[^>]*?)?\/?>/g, '');
 
-  // 7. Remove empty markdown badges or orphaned brackets
+  // 9. Remove any JSX attribute artifacts like padding={3} gap={3} clip
+  text = text.replace(/padding=\{[^}]*\}|gap=\{[^}]*\}|radius=\{[^}]*\}|color=\{[^}]*\}|clip/gi, '');
+
+  // 10. Remove empty brackets []
   text = text.replace(/\[\s*\]/g, '');
 
-  // 8. Clean up indentation artifacts left behind by stripped layout tags
-  const lines = text.split('\n').map((line) => {
-    // If line had leading spaces that were just indentation for JSX tags, trim if not a code block or list item
-    if (/^\s{2,}([-*+]|\d+\.|\#|[A-Z])/.test(line)) {
-      return line.trim();
+  // 11. Clean up line indentation and empty spaces left by stripped tags
+  const lines = text.split('\n').map((line) => line.trim());
+
+  // Deduplicate excessive empty lines
+  const cleanedLines: string[] = [];
+  for (const line of lines) {
+    if (!line && cleanedLines.length > 0 && !cleanedLines[cleanedLines.length - 1]) {
+      continue;
     }
-    return line;
-  });
+    cleanedLines.push(line);
+  }
 
-  text = lines.join('\n');
-
-  // 9. Normalize multiple consecutive blank lines
+  text = cleanedLines.join('\n');
   text = text.replace(/\n{3,}/g, '\n\n').trim();
 
   return text;

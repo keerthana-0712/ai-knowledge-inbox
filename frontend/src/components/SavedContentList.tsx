@@ -12,6 +12,7 @@ import {
   FolderOpen
 } from 'lucide-react';
 import { Item } from '../types';
+import { sanitizeDisplay } from '../utils/text';
 
 interface SavedContentListProps {
   items: Item[];
@@ -195,7 +196,7 @@ export const SavedContentList: React.FC<SavedContentListProps> = ({
 
                   {/* Content Preview */}
                   <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">
-                    {item.raw_content}
+                    {sanitizeDisplay(item.raw_content)}
                   </p>
                 </div>
 

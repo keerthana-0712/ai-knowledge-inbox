@@ -11,6 +11,7 @@ import {
   Percent
 } from 'lucide-react';
 import { QueryResult } from '../types';
+import { sanitizeDisplay } from '../utils/text';
 
 interface AnswerDisplayProps {
   result: QueryResult;
@@ -216,10 +217,10 @@ export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear })
                   {/* Snippet Content */}
                   <div className="mt-2.5 text-xs text-slate-300 leading-relaxed font-sans bg-black/20 p-2.5 rounded border border-white/5">
                     {isExpanded ? (
-                      <p className="whitespace-pre-wrap">{source.content}</p>
+                      <p className="whitespace-pre-wrap">{sanitizeDisplay(source.content)}</p>
                     ) : (
                       <p className="line-clamp-2">
-                        {source.content}
+                        {sanitizeDisplay(source.content)}
                       </p>
                     )}
                   </div>
