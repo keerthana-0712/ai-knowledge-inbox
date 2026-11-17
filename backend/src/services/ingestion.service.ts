@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { randomUUID } from 'crypto';
 import { dbService } from '../database/db.js';
 import { chunkText } from '../utils/chunker.js';
+import { cleanExtractedText } from '../utils/cleaner.js';
 import { embeddingService } from './embedding.service.js';
 import { validateSafeUrl } from '../utils/ssrf.js';
 import { logger } from '../utils/logger.js';
@@ -63,18 +64,34 @@ class IngestionService {
           const autoTitle = chatData.title || 'ChatGPT Shared Conversation';
           const parts: string[] = [];
 
-          if (chatData.mapping) {
-            for (const key of Object.keys(chatData.mapping)) {
-              const msg = chatData.mapping[key]?.message;
-              if (msg && msg.content && Array.isArray(msg.content.parts)) {
-                for (const part of msg.content.parts) {
-                  if (
-                    typeof part === 'string' &&
-                    part.trim().length > 0 &&
-                    !part.includes('The output of this plugin was redacted')
-                  ) {
-                    const role = msg.author?.role === 'user' ? 'User' : 'Assistant';
-                    parts.push(`${role}:\n${part.trim()}`);
+          // Use true chronological conversation flow if available
+          const messageList: any[] = Array.isArray(chatData.linear_conversation)
+            ? chatData.linear_conversation
+            : Object.values(chatData.mapping || {});
+
+          for (const item of messageList) {
+            const msg = item.message;
+            if (msg && msg.content && Array.isArray(msg.content.parts)) {
+              const role =
+                msg.author?.role === 'user'
+                  ? 'User'
+                  : msg.author?.role === 'assistant'
+                  ? 'Assistant'
+                  : null;
+
+              if (role) {
+                const textParts = msg.content.parts.filter(
+                  (p: any) =>
+                    typeof p === 'string' &&
+                    p.trim().length > 0 &&
+                    !p.includes('The output of this plugin was redacted')
+                );
+
+                if (textParts.length > 0) {
+                  const rawTurn = textParts.join('\n\n');
+                  const cleanedTurn = cleanExtractedText(rawTurn);
+                  if (cleanedTurn.length > 0) {
+                    parts.push(`**${role}:**\n\n${cleanedTurn}`);
                   }
                 }
               }
@@ -193,11 +210,12 @@ class IngestionService {
     content: string;
   }): Promise<IngestResult> {
     const { title, sourceType, sourceUrl, content } = params;
+    const sanitizedContent = cleanExtractedText(content);
     const itemId = randomUUID();
     const now = new Date().toISOString();
 
     const textChunks = chunkText(
-      content,
+      sanitizedContent,
       config.chunking.chunkSize,
       config.chunking.chunkOverlap
     );
@@ -215,7 +233,7 @@ class IngestionService {
       title: title.slice(0, 200),
       source_type: sourceType,
       source_url: sourceUrl,
-      raw_content: content,
+      raw_content: sanitizedContent,
       created_at: now,
     };
 
