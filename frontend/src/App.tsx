@@ -110,6 +110,7 @@ export function App() {
               onAsk={executeQuery}
               isQuerying={isQuerying}
               hasSavedItems={items.length > 0}
+              items={items}
             />
 
             {queryError && (

@@ -1,23 +1,19 @@
 import React, { useState } from 'react';
 import { Search, Loader2, ArrowRight, CornerDownLeft } from 'lucide-react';
+import { Item } from '../types';
 
 interface AskAISectionProps {
   onAsk: (question: string) => void;
   isQuerying: boolean;
   hasSavedItems: boolean;
+  items?: Item[];
 }
-
-const EXAMPLE_QUESTIONS = [
-  'What are the key points in Unit 1?',
-  'What does Turium AI specialize in?',
-  'Explain the four elements of negligence',
-  'Summarize recent engineering ethics notes',
-];
 
 export const AskAISection: React.FC<AskAISectionProps> = ({
   onAsk,
   isQuerying,
   hasSavedItems,
+  items = [],
 }) => {
   const [question, setQuestion] = useState('');
 
@@ -27,10 +23,27 @@ export const AskAISection: React.FC<AskAISectionProps> = ({
     onAsk(question.trim());
   };
 
-  const handleSelectExample = (example: string) => {
-    setQuestion(example);
-    onAsk(example);
+  const handleSelectSuggestion = (suggestedQuery: string) => {
+    setQuestion(suggestedQuery);
+    onAsk(suggestedQuery);
   };
+
+  // Dynamically derive contextual suggestions only from the user's actual saved documents
+  const contextualSuggestions = React.useMemo(() => {
+    if (!items || items.length === 0) return [];
+
+    const suggestions: string[] = [];
+    const recent = items.slice(0, 3);
+
+    for (const item of recent) {
+      const cleanTitle = item.title.trim();
+      if (cleanTitle) {
+        suggestions.push(`Summarize "${cleanTitle}"`);
+      }
+    }
+
+    return suggestions.slice(0, 3);
+  }, [items]);
 
   return (
     <div className="space-y-3.5">
@@ -54,7 +67,7 @@ export const AskAISection: React.FC<AskAISectionProps> = ({
             placeholder={
               hasSavedItems
                 ? 'Ask anything across your saved notes and web links...'
-                : 'Save notes or URLs to ask questions...'
+                : 'Save notes or URLs to ask questions across your library...'
             }
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
@@ -84,21 +97,23 @@ export const AskAISection: React.FC<AskAISectionProps> = ({
         </div>
       </form>
 
-      {/* Suggested Query Chips */}
-      <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-        <span className="text-[11px] text-[#78757d] font-medium mr-1">Suggestions:</span>
-        {EXAMPLE_QUESTIONS.map((example, i) => (
-          <button
-            key={i}
-            onClick={() => handleSelectExample(example)}
-            disabled={isQuerying}
-            className="text-[11px] px-2.5 py-1 rounded-full bg-white hover:bg-[#f5f0ff] border border-[#e8e4dd] hover:border-[#d9c6ff] text-[#39383c] hover:text-[#6100ff] transition-all flex items-center gap-1 disabled:opacity-50 shadow-xs"
-          >
-            <span>{example}</span>
-            <ArrowRight className="w-2.5 h-2.5 text-[#78757d]" />
-          </button>
-        ))}
-      </div>
+      {/* Dynamic Suggestions based exclusively on real saved documents */}
+      {contextualSuggestions.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+          <span className="text-[11px] text-[#78757d] font-medium mr-1">Suggestions:</span>
+          {contextualSuggestions.map((queryText, i) => (
+            <button
+              key={i}
+              onClick={() => handleSelectSuggestion(queryText)}
+              disabled={isQuerying}
+              className="text-[11px] px-2.5 py-1 rounded-full bg-white hover:bg-[#f5f0ff] border border-[#e8e4dd] hover:border-[#d9c6ff] text-[#39383c] hover:text-[#6100ff] transition-all flex items-center gap-1 disabled:opacity-50 shadow-xs"
+            >
+              <span className="truncate max-w-[240px]">{queryText}</span>
+              <ArrowRight className="w-2.5 h-2.5 text-[#78757d]" />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
