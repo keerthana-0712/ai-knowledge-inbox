@@ -49,11 +49,87 @@
   margin: 0 2px;
   cursor: pointer;
   vertical-align: baseline;
-  transition: all 0.15s ease;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .citation-pill:hover {
   background-color: #6100ff;
   color: #ffffff;
   border-color: #6100ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(97, 0, 255, 0.25);
+}
+
+/* Welcoming Staggered Entrance Animations */
+@keyframes welcomeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes welcomeFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes ambientBeacon {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scaleX(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes modalScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-welcome-1 {
+  animation: welcomeSlideUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-welcome-2 {
+  animation: welcomeSlideUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-welcome-3 {
+  animation: welcomeSlideUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-welcome-4 {
+  animation: welcomeSlideUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+  opacity: 0;
+}
+
+.animate-sidebar-enter {
+  animation: welcomeFadeIn 0.5s ease-out forwards;
+}
+
+.animate-modal-enter {
+  animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-ambient-beacon {
+  animation: ambientBeacon 4s ease-in-out infinite;
 }

@@ -71,7 +71,7 @@ export function App() {
     <div className="flex h-screen bg-[#fcfbf9] text-[#111114] overflow-hidden font-sans">
       {/* Toast Notification */}
       {notification && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-dropdown border text-xs font-semibold bg-white border-[#e8e4dd] text-[#111114] animate-in fade-in slide-in-from-top-2">
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-dropdown border text-xs font-semibold bg-white border-[#e8e4dd] text-[#111114] animate-modal-enter">
           {notification.type === 'success' ? (
             <CheckCircle className="w-4 h-4 text-emerald-600" />
           ) : (
@@ -94,7 +94,10 @@ export function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto relative">
+        {/* Ambient Top Beacon Line */}
+        <div className="sticky top-0 z-30 h-[2px] w-full bg-gradient-to-r from-transparent via-[#6100ff]/60 to-transparent animate-ambient-beacon pointer-events-none" />
+
         <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
           {/* Welcome Banner */}
           <WelcomeBanner
@@ -105,7 +108,7 @@ export function App() {
           />
 
           {/* Ask AI Section */}
-          <div className="rounded-xl border border-[#e8e4dd] bg-white p-6 shadow-card">
+          <div className="rounded-xl border border-[#e8e4dd] bg-white p-6 shadow-card transition-all duration-300 hover:shadow-card-hover animate-welcome-2">
             <AskAISection
               onAsk={executeQuery}
               isQuerying={isQuerying}
@@ -123,14 +126,16 @@ export function App() {
 
           {/* RAG Answer Display */}
           {queryResult && (
-            <AnswerDisplay
-              result={queryResult}
-              onClear={clearResult}
-            />
+            <div className="animate-welcome-1">
+              <AnswerDisplay
+                result={queryResult}
+                onClear={clearResult}
+              />
+            </div>
           )}
 
           {/* Saved Content Section */}
-          <div className="rounded-xl border border-[#e8e4dd] bg-white p-6 shadow-card">
+          <div className="rounded-xl border border-[#e8e4dd] bg-white p-6 shadow-card transition-all duration-300 hover:shadow-card-hover animate-welcome-3">
             <SavedContentList
               items={items}
               activeFilter={activeFilter}

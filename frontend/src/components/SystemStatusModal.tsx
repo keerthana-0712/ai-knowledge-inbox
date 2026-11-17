@@ -18,7 +18,7 @@ export const SystemStatusModal: React.FC<SystemStatusModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
       <div 
-        className="w-full max-w-lg bg-white border border-[#e8e4dd] rounded-xl shadow-dropdown overflow-hidden flex flex-col max-h-[85vh]"
+        className="w-full max-w-lg bg-white border border-[#e8e4dd] rounded-xl shadow-dropdown overflow-hidden flex flex-col max-h-[85vh] animate-modal-enter"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

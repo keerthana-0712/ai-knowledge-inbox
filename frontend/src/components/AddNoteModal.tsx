@@ -46,7 +46,7 @@ export const AddNoteModal: React.FC<AddNoteModalProps> = ({ isOpen, onClose, onS
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
       <div 
-        className="w-full max-w-lg bg-white border border-[#e8e4dd] rounded-xl shadow-dropdown overflow-hidden"
+        className="w-full max-w-lg bg-white border border-[#e8e4dd] rounded-xl shadow-dropdown overflow-hidden animate-modal-enter"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
