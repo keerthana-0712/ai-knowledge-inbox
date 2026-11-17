@@ -38,7 +38,6 @@ class IngestionService {
   async ingestUrl(url: string, customTitle?: string): Promise<IngestResult> {
     const trimmedUrl = url.trim();
 
-    // 1. SSRF and URL validation
     const validation = validateSafeUrl(trimmedUrl);
     if (!validation.isValid) {
       throw new Error(`Invalid or unsafe URL: ${validation.error}`);
@@ -114,7 +113,6 @@ class IngestionService {
       }
     }
 
-    // 2. Fetch page content with timeout and user-agent
     let response: Response;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 12000); // 12-second timeout

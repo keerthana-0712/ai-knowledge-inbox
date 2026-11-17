@@ -38,10 +38,8 @@ export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear })
 
   const handleCitationClick = (citationNum: number) => {
     setHighlightedCitation(citationNum);
-    // Expand the corresponding source card
     setExpandedSnippets((prev) => ({ ...prev, [citationNum]: true }));
 
-    // Scroll to source card
     const el = document.getElementById(`source-card-${citationNum}`);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -50,9 +48,6 @@ export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear })
     setTimeout(() => setHighlightedCitation(null), 2500);
   };
 
-  /**
-   * Parses the text and renders [1], [2], [1][2] as interactive clickable citation badges.
-   */
   const renderGroundedAnswer = (text: string) => {
     const parts = text.split(/(\[\d+\])/g);
 
@@ -65,10 +60,10 @@ export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear })
           <button
             key={index}
             onClick={() => handleCitationClick(citationNum)}
-            title={`Jump to Source [${citationNum}]`}
+            title={`View Source [${citationNum}]`}
             className={`citation-pill ${
               isHighlighted
-                ? 'ring-2 ring-indigo-400 bg-indigo-500/40 text-white scale-110'
+                ? 'ring-2 ring-[#6100ff] bg-[#6100ff]/30 text-white'
                 : ''
             }`}
           >
@@ -81,31 +76,31 @@ export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear })
   };
 
   return (
-    <div className="space-y-4 rounded-xl border border-white/10 bg-[#0f121a] p-6 shadow-2xl animate-fade-in">
-      {/* Question Header & Meta */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-white/5">
+    <div className="space-y-4 rounded-lg border border-[#1e222f] bg-[#0c0e14] p-5 shadow-sm">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#1c1f2b]">
         <div>
-          <span className="text-[10px] uppercase font-semibold text-indigo-400 tracking-wider">
-            Grounded Answer
+          <span className="text-[10px] uppercase font-semibold text-[#8b3dff] tracking-wider">
+            Generated Answer
           </span>
-          <h3 className="text-base font-semibold text-white mt-0.5">
+          <h3 className="text-sm font-semibold text-white mt-0.5">
             "{result.question}"
           </h3>
         </div>
 
-        <div className="flex items-center gap-3 text-xs text-slate-400">
-          <span className="flex items-center gap-1 font-mono text-[11px] bg-white/5 px-2 py-0.5 rounded border border-white/5">
-            <Clock className="w-3 h-3 text-slate-400" />
+        <div className="flex items-center gap-2 text-xs text-[#71717a]">
+          <span className="flex items-center gap-1 font-mono text-[11px] bg-[#141722] px-2 py-0.5 rounded border border-[#232736]">
+            <Clock className="w-3 h-3 text-[#71717a]" />
             <span>{result.processingTimeMs}ms</span>
           </span>
 
-          <span className="text-[11px] font-mono text-slate-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
+          <span className="text-[11px] font-mono text-[#a1a1aa] bg-[#141722] px-2 py-0.5 rounded border border-[#232736]">
             {result.model}
           </span>
 
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1 text-slate-400 hover:text-white transition-colors p-1"
+            className="p-1 rounded text-[#71717a] hover:text-white hover:bg-[#141722] transition-colors"
             title="Copy answer"
           >
             {copied ? (
@@ -118,36 +113,36 @@ export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear })
       </div>
 
       {/* Answer Body */}
-      <div className="prose prose-invert max-w-none text-slate-200 text-sm leading-relaxed whitespace-pre-line py-1 font-sans">
+      <div className="text-sm leading-relaxed text-[#d4d4d8] whitespace-pre-line py-1 font-sans">
         {renderGroundedAnswer(result.answer)}
       </div>
 
-      {/* Verifiable Citations and Source Snippets Section */}
-      <div className="pt-4 border-t border-white/5 space-y-3">
+      {/* Source References */}
+      <div className="pt-3 border-t border-[#1c1f2b] space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              Retrieved Source Snippets ({result.sources.length})
+            <h4 className="text-xs font-semibold text-[#a1a1aa] uppercase tracking-wider">
+              Sources ({result.sources.length})
             </h4>
-            <span className="text-[10px] text-slate-500">
+            <span className="text-[10px] text-[#52525b]">
               Ranked by vector cosine similarity
             </span>
           </div>
 
           <button
             onClick={onClear}
-            className="text-[11px] text-slate-500 hover:text-slate-300 transition-colors"
+            className="text-[11px] text-[#71717a] hover:text-[#d4d4d8] transition-colors"
           >
-            Dismiss Answer
+            Dismiss
           </button>
         </div>
 
         {result.sources.length === 0 ? (
-          <div className="p-4 rounded-lg bg-white/5 text-xs text-slate-400 text-center">
-            No source chunks were retrieved for this query.
+          <div className="p-3 rounded bg-[#131620] text-xs text-[#71717a] text-center border border-[#1e222f]">
+            No context snippets were retrieved for this query.
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-2.5">
+          <div className="space-y-2">
             {result.sources.map((source) => {
               const isExpanded = expandedSnippets[source.citationNumber];
               const isHighlighted = highlightedCitation === source.citationNumber;
@@ -157,25 +152,25 @@ export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear })
                 <div
                   id={`source-card-${source.citationNumber}`}
                   key={source.chunkId}
-                  className={`rounded-lg border transition-all p-3.5 ${
+                  className={`rounded-md border p-3 transition-colors ${
                     isHighlighted
-                      ? 'border-indigo-500/80 bg-indigo-950/30 ring-1 ring-indigo-500/50 shadow-lg'
-                      : 'border-white/5 bg-[#141722]/60 hover:bg-[#141722] hover:border-white/10'
+                      ? 'border-[#6100ff] bg-[#141224]'
+                      : 'border-[#1e222f] bg-[#0f1118] hover:border-[#2a2f40]'
                   }`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="flex-shrink-0 w-5 h-5 rounded bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 font-mono text-xs font-bold flex items-center justify-center">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="flex-shrink-0 w-4 h-4 rounded bg-[#6100ff]/20 text-[#a855f7] font-mono text-[10px] font-bold flex items-center justify-center">
                         {source.citationNumber}
                       </span>
 
                       <div className="flex items-center gap-1.5 min-w-0">
                         {source.sourceType === 'note' ? (
-                          <FileText className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+                          <FileText className="w-3.5 h-3.5 text-[#9d66ff] flex-shrink-0" />
                         ) : (
-                          <Globe className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                          <Globe className="w-3.5 h-3.5 text-[#38bdf8] flex-shrink-0" />
                         )}
-                        <span className="text-xs font-medium text-slate-200 truncate">
+                        <span className="text-xs font-medium text-[#e4e4e7] truncate">
                           {source.title}
                         </span>
                       </div>
@@ -185,8 +180,8 @@ export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear })
                           href={source.sourceUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-slate-500 hover:text-cyan-400 transition-colors"
-                          title="Open original webpage"
+                          className="text-[#71717a] hover:text-white transition-colors"
+                          title="Open original link"
                         >
                           <ExternalLink className="w-3 h-3" />
                         </a>
@@ -194,16 +189,15 @@ export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear })
                     </div>
 
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      {/* Similarity Score Badge */}
-                      <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-medium flex items-center gap-0.5">
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-medium flex items-center gap-0.5">
                         <Percent className="w-2.5 h-2.5" />
                         <span>{matchPercentage}% Match</span>
                       </span>
 
                       <button
                         onClick={() => toggleSnippet(source.citationNumber)}
-                        className="text-slate-400 hover:text-white p-1 rounded hover:bg-white/5 transition-colors"
-                        title={isExpanded ? 'Collapse' : 'Expand full chunk'}
+                        className="text-[#71717a] hover:text-white p-0.5 transition-colors"
+                        title={isExpanded ? 'Collapse' : 'Expand full snippet'}
                       >
                         {isExpanded ? (
                           <ChevronUp className="w-3.5 h-3.5" />
@@ -214,8 +208,8 @@ export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear })
                     </div>
                   </div>
 
-                  {/* Snippet Content */}
-                  <div className="mt-2.5 text-xs text-slate-300 leading-relaxed font-sans bg-black/20 p-2.5 rounded border border-white/5">
+                  {/* Sanitized Text Content */}
+                  <div className="mt-2 text-xs text-[#a1a1aa] leading-relaxed bg-[#08090d] p-2.5 rounded border border-[#181a24]">
                     {isExpanded ? (
                       <p className="whitespace-pre-wrap">{sanitizeDisplay(source.content)}</p>
                     ) : (

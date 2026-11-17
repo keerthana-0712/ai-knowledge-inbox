@@ -33,21 +33,17 @@ class RAGService {
 
     logger.info(`[RAGService] Processing query: "${trimmedQuestion}"`);
 
-    // 1. Generate query embedding
     const queryVector = await embeddingService.generateEmbedding(trimmedQuestion);
-
-    // 2. Retrieve top-k relevant chunks via cosine similarity
     const retrievedChunks = vectorService.findSimilarChunks(
       queryVector,
       topK || config.chunking.maxRetrievalChunks
     );
 
-    // 3. Handle case where no relevant chunks are found
     if (retrievedChunks.length === 0) {
       return {
         question: trimmedQuestion,
         answer:
-          'Based on your saved knowledge, no relevant notes or saved URLs were found to answer this question. Try adding notes or URLs related to this topic first.',
+          'No relevant documents or saved URLs were found to answer this question. Add related content to your knowledge inbox first.',
         citations: [],
         sources: [],
         model: this.getModelName(),
@@ -55,7 +51,6 @@ class RAGService {
       };
     }
 
-    // 4. Map chunks into numbered sources & citations
     const sources: SourceSnippet[] = retrievedChunks.map((chunk, index) => {
       const citationNumber = index + 1;
       return {
@@ -80,7 +75,6 @@ class RAGService {
       sourceUrl: s.sourceUrl,
     }));
 
-    // 5. Construct grounded context
     const contextText = sources
       .map(
         (s) =>

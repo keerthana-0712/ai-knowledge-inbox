@@ -14,10 +14,10 @@ class EmbeddingService {
         baseURL: config.openai.baseURL,
       });
       this.isUsingOpenAI = true;
-      logger.info(`[EmbeddingService] Initialized with OpenAI provider using model '${config.openai.embeddingModel}'.`);
+      logger.info(`[EmbeddingService] Initialized OpenAI client with model '${config.openai.embeddingModel}'.`);
     } else {
       this.isUsingOpenAI = false;
-      logger.warn('[EmbeddingService] OPENAI_API_KEY not provided. Running in deterministic local embedding mode.');
+      logger.info('[EmbeddingService] Using local embedding vectorizer.');
     }
   }
 
@@ -58,15 +58,9 @@ class EmbeddingService {
       }
     }
 
-    // Deterministic local vectorizer fallback for zero-dependency local operation
     return texts.map((t) => this.generateLocalDeterministicEmbedding(t));
   }
 
-  /**
-   * High-quality deterministic local vectorizer:
-   * Maps words, bigrams, and character n-grams to a 256-dimensional L2-normalized vector.
-   * Enables genuine cosine similarity calculations and semantic ranking without external network calls.
-   */
   private generateLocalDeterministicEmbedding(text: string): number[] {
     const DIMENSIONS = 256;
     const vector = new Array<number>(DIMENSIONS).fill(0);

@@ -29,7 +29,7 @@ export function App() {
 
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
     setNotification({ message, type });
-    setTimeout(() => setNotification(null), 4000);
+    setTimeout(() => setNotification(null), 3500);
   };
 
   const fetchHealth = async () => {
@@ -37,7 +37,7 @@ export function App() {
       const data = await api.getHealth();
       setHealthInfo(data);
     } catch {
-      // Ignored if offline
+      // Offline fallback
     }
   };
 
@@ -50,13 +50,13 @@ export function App() {
   const handleIngestSuccess = () => {
     refreshItems();
     fetchHealth();
-    showNotification('Content saved and semantically indexed into SQLite vector store!');
+    showNotification('Item indexed successfully.');
   };
 
   const handleDeleteItem = async (id: string) => {
     const res = await deleteItem(id);
     if (res.success) {
-      showNotification('Item and its associated vector chunks permanently deleted.');
+      showNotification('Item removed.');
       fetchHealth();
       if (selectedItem?.id === id) {
         setSelectedItem(null);
@@ -68,10 +68,10 @@ export function App() {
   };
 
   return (
-    <div className="flex h-screen bg-[#0c0e14] text-slate-100 overflow-hidden font-sans">
+    <div className="flex h-screen bg-[#050507] text-[#f4f4f6] overflow-hidden font-sans">
       {/* Toast Notification */}
       {notification && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-lg shadow-2xl border text-xs font-medium animate-slide-up bg-[#141824] border-white/10 text-white">
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 px-3.5 py-2 rounded-md shadow-lg border text-xs font-medium bg-[#11131a] border-[#222636] text-white">
           {notification.type === 'success' ? (
             <CheckCircle className="w-4 h-4 text-emerald-400" />
           ) : (
@@ -93,9 +93,9 @@ export function App() {
         healthInfo={healthInfo}
       />
 
-      {/* Main Content Area */}
+      {/* Main Content View */}
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto px-6 py-8 space-y-8">
+        <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
           {/* Welcome Banner */}
           <WelcomeBanner
             onAddNote={() => setIsNoteModalOpen(true)}
@@ -105,23 +105,22 @@ export function App() {
           />
 
           {/* Ask AI Section */}
-          <div className="rounded-xl border border-white/5 bg-[#0e111a]/80 p-6 shadow-xl backdrop-blur-md">
+          <div className="rounded-lg border border-[#1e222f] bg-[#0c0e14] p-5 shadow-sm">
             <AskAISection
               onAsk={executeQuery}
               isQuerying={isQuerying}
               hasSavedItems={items.length > 0}
             />
 
-            {/* Error banner if query fails */}
             {queryError && (
-              <div className="mt-4 p-3.5 rounded-lg bg-red-500/10 border border-red-500/20 text-xs text-red-300 flex items-center gap-2">
+              <div className="mt-3 p-3 rounded bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{queryError}</span>
               </div>
             )}
           </div>
 
-          {/* RAG Answer Section */}
+          {/* RAG Answer Display */}
           {queryResult && (
             <AnswerDisplay
               result={queryResult}
@@ -130,7 +129,7 @@ export function App() {
           )}
 
           {/* Saved Content Section */}
-          <div className="rounded-xl border border-white/5 bg-[#0e111a]/80 p-6 shadow-xl backdrop-blur-md">
+          <div className="rounded-lg border border-[#1e222f] bg-[#0c0e14] p-5 shadow-sm">
             <SavedContentList
               items={items}
               activeFilter={activeFilter}

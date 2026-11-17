@@ -6,15 +6,7 @@ export interface TextChunk {
 }
 
 /**
- * Intentionally designed recursive/paragraph-aware text chunking strategy.
- * 
- * RATIONALE:
- * 1. Paragraph & Sentence Boundaries: Retains complete semantic thoughts rather than
- *    blindly slicing across words or punctuation.
- * 2. Window Size (default ~600 chars / ~100-120 words): Captures an atomic factual unit
- *    ideal for vector similarity with text-embedding-3-small, preventing dilution.
- * 3. Overlap (default ~100 chars): Maintains contextual continuity so statements on the
- *    edge of a split are not disconnected from qualifying clauses.
+ * Splits input text into overlapping chunks, respecting paragraph and sentence boundaries.
  */
 export function chunkText(
   text: string,

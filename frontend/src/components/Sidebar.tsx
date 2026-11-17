@@ -1,15 +1,16 @@
 import React from 'react';
 import { 
-  Inbox, 
   FileText, 
   Globe, 
   Database, 
   Cpu, 
   Plus, 
   ChevronRight,
-  Info
+  Settings2,
+  FolderKanban
 } from 'lucide-react';
 import { Item, HealthInfo } from '../types';
+import { TuriumLogo } from './TuriumLogo';
 
 interface SidebarProps {
   items: Item[];
@@ -37,60 +38,60 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const totalChunks = items.reduce((acc, i) => acc + (i.chunk_count || 0), 0);
 
   return (
-    <aside className="w-72 bg-[#090b10] border-r border-white/5 flex flex-col h-screen select-none">
+    <aside className="w-64 bg-[#08090d] border-r border-[#191c26] flex flex-col h-screen select-none">
       {/* Brand Header */}
-      <div className="p-4 border-b border-white/5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-            <Inbox className="w-4 h-4" />
+      <div className="h-14 px-4 border-b border-[#191c26] flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-md bg-[#6100ff]/10 border border-[#6100ff]/25 flex items-center justify-center">
+            <TuriumLogo size={16} />
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-slate-100 tracking-tight flex items-center gap-1.5">
-              AI Knowledge Inbox
-            </h1>
-            <p className="text-[10px] text-slate-500 font-medium tracking-wide uppercase">
-              Turium AI Assessment
+            <div className="text-xs font-semibold text-white tracking-tight flex items-center gap-1.5">
+              <span>Knowledge Inbox</span>
+            </div>
+            <p className="text-[10px] text-[#71717a] font-medium tracking-wide">
+              Turium Enterprise AI
             </p>
           </div>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="p-3 grid grid-cols-2 gap-2 border-b border-white/5">
+      {/* Primary Actions */}
+      <div className="p-3 grid grid-cols-2 gap-2 border-b border-[#191c26]">
         <button
           onClick={onOpenAddNote}
-          className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium bg-white/5 hover:bg-white/10 text-slate-200 rounded-md border border-white/10 transition-colors"
+          className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#6100ff] hover:bg-[#5200db] text-white rounded-md transition-colors shadow-sm"
         >
-          <Plus className="w-3.5 h-3.5 text-indigo-400" />
+          <Plus className="w-3.5 h-3.5" />
           <span>Note</span>
         </button>
         <button
           onClick={onOpenAddUrl}
-          className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium bg-white/5 hover:bg-white/10 text-slate-200 rounded-md border border-white/10 transition-colors"
+          className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#141722] hover:bg-[#1a1e2d] text-[#e4e4e7] rounded-md border border-[#232736] transition-colors"
         >
-          <Plus className="w-3.5 h-3.5 text-cyan-400" />
-          <span>URL</span>
+          <Plus className="w-3.5 h-3.5 text-[#a1a1aa]" />
+          <span>Link</span>
         </button>
       </div>
 
-      {/* Navigation & Filters */}
-      <div className="p-3 space-y-1">
-        <div className="text-[10px] uppercase font-semibold text-slate-500 px-2 py-1 tracking-wider">
-          Views
+      {/* Navigation Filter Tabs */}
+      <div className="px-3 pt-3 pb-2 space-y-0.5">
+        <div className="text-[10px] uppercase font-semibold text-[#52525b] px-2 py-1 tracking-wider">
+          Library
         </div>
         <button
           onClick={() => onFilterChange('all')}
           className={`w-full flex items-center justify-between px-2.5 py-1.5 text-xs rounded-md font-medium transition-colors ${
             activeFilter === 'all'
-              ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+              ? 'bg-[#181a24] text-white border border-[#2c3042]'
+              : 'text-[#a1a1aa] hover:text-white hover:bg-[#12141c]'
           }`}
         >
           <div className="flex items-center gap-2">
-            <Inbox className="w-3.5 h-3.5" />
-            <span>All Knowledge</span>
+            <FolderKanban className="w-3.5 h-3.5 text-[#71717a]" />
+            <span>All Documents</span>
           </div>
-          <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-slate-400">
+          <span className="text-[10px] font-mono text-[#71717a]">
             {items.length}
           </span>
         </button>
@@ -99,15 +100,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => onFilterChange('note')}
           className={`w-full flex items-center justify-between px-2.5 py-1.5 text-xs rounded-md font-medium transition-colors ${
             activeFilter === 'note'
-              ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+              ? 'bg-[#181a24] text-white border border-[#2c3042]'
+              : 'text-[#a1a1aa] hover:text-white hover:bg-[#12141c]'
           }`}
         >
           <div className="flex items-center gap-2">
-            <FileText className="w-3.5 h-3.5 text-indigo-400" />
+            <FileText className="w-3.5 h-3.5 text-[#9d66ff]" />
             <span>Notes</span>
           </div>
-          <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-slate-400">
+          <span className="text-[10px] font-mono text-[#71717a]">
             {noteCount}
           </span>
         </button>
@@ -116,79 +117,79 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => onFilterChange('url')}
           className={`w-full flex items-center justify-between px-2.5 py-1.5 text-xs rounded-md font-medium transition-colors ${
             activeFilter === 'url'
-              ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+              ? 'bg-[#181a24] text-white border border-[#2c3042]'
+              : 'text-[#a1a1aa] hover:text-white hover:bg-[#12141c]'
           }`}
         >
           <div className="flex items-center gap-2">
-            <Globe className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Saved URLs</span>
+            <Globe className="w-3.5 h-3.5 text-[#38bdf8]" />
+            <span>Web Links</span>
           </div>
-          <span className="text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-slate-400">
+          <span className="text-[10px] font-mono text-[#71717a]">
             {urlCount}
           </span>
         </button>
       </div>
 
-      {/* Saved Knowledge List */}
-      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
-        <div className="text-[10px] uppercase font-semibold text-slate-500 px-2 py-1 tracking-wider">
-          Saved Items ({items.length})
+      {/* Saved Items Explorer */}
+      <div className="flex-1 overflow-y-auto px-3 py-1 space-y-0.5">
+        <div className="text-[10px] uppercase font-semibold text-[#52525b] px-2 py-1 tracking-wider">
+          Recent Items
         </div>
         {items.length === 0 ? (
-          <div className="px-2 py-4 text-center">
-            <p className="text-xs text-slate-500">No saved items yet.</p>
-            <p className="text-[10px] text-slate-600 mt-1">Add a note or URL to begin.</p>
+          <div className="px-2 py-6 text-center">
+            <p className="text-xs text-[#52525b]">No items indexed.</p>
           </div>
         ) : (
           items.map((item) => (
             <button
               key={item.id}
               onClick={() => onSelectItem(item)}
-              className="w-full text-left px-2.5 py-2 rounded-md hover:bg-white/5 group transition-colors flex items-center justify-between"
+              className="w-full text-left px-2.5 py-1.5 rounded-md hover:bg-[#12141c] group transition-colors flex items-center justify-between"
             >
-              <div className="flex items-center gap-2 min-w-0 pr-2">
+              <div className="flex items-center gap-2 min-w-0 pr-1">
                 {item.source_type === 'note' ? (
-                  <FileText className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+                  <FileText className="w-3 h-3 text-[#9d66ff] flex-shrink-0" />
                 ) : (
-                  <Globe className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                  <Globe className="w-3 h-3 text-[#38bdf8] flex-shrink-0" />
                 )}
-                <span className="text-xs text-slate-300 truncate group-hover:text-white">
+                <span className="text-xs text-[#d4d4d8] truncate group-hover:text-white">
                   {item.title}
                 </span>
               </div>
-              <ChevronRight className="w-3 h-3 text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+              <ChevronRight className="w-3 h-3 text-[#52525b] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
             </button>
           ))
         )}
       </div>
 
-      {/* System Stats & Architecture Info */}
-      <div className="p-3 border-t border-white/5 bg-[#07080c] space-y-2">
-        <div className="flex items-center justify-between text-[11px] text-slate-400">
+      {/* System Status Footer */}
+      <div className="p-3 border-t border-[#191c26] bg-[#050608] space-y-1.5 text-xs">
+        <div className="flex items-center justify-between text-[11px] text-[#71717a]">
           <span className="flex items-center gap-1.5">
-            <Database className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+            <Database className="w-3 h-3 text-[#71717a]" />
             <span>SQLite Vectors</span>
           </span>
-          <span className="font-mono text-slate-300">{totalChunks} chunks</span>
+          <span className="font-mono text-[#a1a1aa]">{totalChunks} chunks</span>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-slate-400">
+        <div className="flex items-center justify-between text-[11px] text-[#71717a]">
           <span className="flex items-center gap-1.5">
-            <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Engine</span>
+            <Cpu className="w-3 h-3 text-[#71717a]" />
+            <span>Model Engine</span>
           </span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-slate-300 font-mono">
-            {healthInfo?.ai.provider === 'openai' ? 'OpenAI GPT' : 'Local RAG'}
+          <span className="text-[10px] font-mono text-[#d4d4d8]">
+            {healthInfo?.ai.provider === 'openai' ? 'OpenAI' : 'Local'}
           </span>
         </div>
 
         <button
           onClick={onOpenHealth}
-          className="w-full mt-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] text-slate-400 hover:text-slate-200 hover:bg-white/5 rounded transition-colors"
+          className="w-full mt-1 flex items-center justify-center gap-1.5 py-1 text-[11px] text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#12141c] rounded transition-colors"
         >
-          <Info className="w-3 h-3" />
-          <span>Architecture & Health</span>
+          <Settings2 className="w-3 h-3" />
+          <span>System Information</span>
         </button>
       </div>
     </aside>

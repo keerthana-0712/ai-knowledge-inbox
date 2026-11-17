@@ -50,7 +50,7 @@ export const SavedContentList: React.FC<SavedContentListProps> = ({
     });
 
   const handleDelete = async (id: string, title: string) => {
-    if (window.confirm(`Are you sure you want to delete "${title}"? This will also remove all its indexed vector chunks.`)) {
+    if (window.confirm(`Delete "${title}" and all its indexed vector chunks?`)) {
       setDeletingId(id);
       try {
         await onDeleteItem(id);
@@ -66,7 +66,6 @@ export const SavedContentList: React.FC<SavedContentListProps> = ({
       return date.toLocaleDateString(undefined, {
         month: 'short',
         day: 'numeric',
-        year: 'numeric',
       });
     } catch {
       return 'Recent';
@@ -74,152 +73,151 @@ export const SavedContentList: React.FC<SavedContentListProps> = ({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Top Header & Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-white/5">
+    <div className="space-y-3.5">
+      {/* Header and Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2.5 border-b border-[#1c1f2b]">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-[#a1a1aa]">
             Saved Knowledge
           </h2>
-          <span className="text-xs bg-white/5 px-2 py-0.5 rounded text-slate-400 font-mono">
+          <span className="text-[11px] bg-[#141722] px-2 py-0.5 rounded text-[#71717a] font-mono border border-[#202433]">
             {filteredItems.length}
           </span>
         </div>
 
-        {/* Filter Controls & Search */}
-        <div className="flex items-center gap-2.5">
-          {/* Search Box */}
+        {/* Filters */}
+        <div className="flex items-center gap-2">
+          {/* Search */}
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-[#71717a] absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Filter saved items..."
+              placeholder="Filter items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1.5 text-xs bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 w-44 sm:w-56"
+              className="pl-8 pr-3 py-1 text-xs bg-[#0d0f15] border border-[#202433] rounded-md text-white placeholder-[#52525b] focus:outline-none focus:border-[#6100ff] w-40 sm:w-52"
             />
           </div>
 
-          {/* Type Filter Buttons */}
-          <div className="flex items-center bg-white/5 p-0.5 rounded-lg border border-white/10 text-xs">
+          {/* Type Tabs */}
+          <div className="flex items-center bg-[#0d0f15] p-0.5 rounded-md border border-[#202433] text-xs">
             <button
               onClick={() => onFilterChange('all')}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
+              className={`px-2.5 py-1 rounded transition-colors ${
                 activeFilter === 'all'
-                  ? 'bg-indigo-600 text-white font-medium shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-[#1e2230] text-white font-medium'
+                  : 'text-[#71717a] hover:text-[#d4d4d8]'
               }`}
             >
               All
             </button>
             <button
               onClick={() => onFilterChange('note')}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
+              className={`px-2.5 py-1 rounded transition-colors ${
                 activeFilter === 'note'
-                  ? 'bg-indigo-600 text-white font-medium shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-[#1e2230] text-white font-medium'
+                  : 'text-[#71717a] hover:text-[#d4d4d8]'
               }`}
             >
               Notes
             </button>
             <button
               onClick={() => onFilterChange('url')}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
+              className={`px-2.5 py-1 rounded transition-colors ${
                 activeFilter === 'url'
-                  ? 'bg-indigo-600 text-white font-medium shadow-sm'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'bg-[#1e2230] text-white font-medium'
+                  : 'text-[#71717a] hover:text-[#d4d4d8]'
               }`}
             >
-              URLs
+              Links
             </button>
           </div>
         </div>
       </div>
 
-      {/* Items List */}
+      {/* Grid of Items */}
       {isLoading ? (
-        <div className="p-12 text-center space-y-3">
-          <Loader2 className="w-6 h-6 animate-spin text-indigo-400 mx-auto" />
-          <p className="text-xs text-slate-400">Loading your knowledge base...</p>
+        <div className="p-8 text-center space-y-2">
+          <Loader2 className="w-5 h-5 animate-spin text-[#8b3dff] mx-auto" />
+          <p className="text-xs text-[#71717a]">Loading saved items...</p>
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="p-12 rounded-xl border border-dashed border-white/10 text-center space-y-2 bg-[#0e1017]">
-          <FolderOpen className="w-8 h-8 text-slate-600 mx-auto" />
-          <h3 className="text-sm font-medium text-slate-300">No knowledge items found</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+        <div className="p-10 rounded-lg border border-dashed border-[#202433] text-center space-y-1.5 bg-[#08090d]">
+          <FolderOpen className="w-6 h-6 text-[#52525b] mx-auto" />
+          <h3 className="text-xs font-medium text-[#a1a1aa]">No items found</h3>
+          <p className="text-[11px] text-[#52525b]">
             {searchQuery
-              ? `No items matching "${searchQuery}". Try a different filter.`
-              : 'Add your first note or URL using the buttons above to build your vector knowledge base.'}
+              ? `No items matching "${searchQuery}".`
+              : 'Add your first note or URL to start building your index.'}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           {filteredItems.map((item) => {
             const isDeleting = deletingId === item.id;
 
             return (
               <div
                 key={item.id}
-                className="group relative flex flex-col justify-between p-4 rounded-xl border border-white/5 bg-[#12151f]/80 hover:bg-[#151926] hover:border-white/10 transition-all shadow-md"
+                className="group flex flex-col justify-between p-3.5 rounded-lg border border-[#1e222f] bg-[#0c0e14] hover:bg-[#10121b] hover:border-[#272b3b] transition-colors"
               >
-                <div className="space-y-2.5">
-                  {/* Item Header */}
+                <div className="space-y-2">
+                  {/* Title & Type Icon */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       {item.source_type === 'note' ? (
-                        <div className="p-1.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex-shrink-0">
+                        <div className="p-1 rounded bg-[#6100ff]/10 text-[#9d66ff] border border-[#6100ff]/20 flex-shrink-0">
                           <FileText className="w-3.5 h-3.5" />
                         </div>
                       ) : (
-                        <div className="p-1.5 rounded-md bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex-shrink-0">
+                        <div className="p-1 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 flex-shrink-0">
                           <Globe className="w-3.5 h-3.5" />
                         </div>
                       )}
-                      <h4 className="text-xs font-semibold text-white truncate group-hover:text-indigo-300 transition-colors">
+                      <h4 className="text-xs font-medium text-white truncate group-hover:text-[#a855f7] transition-colors">
                         {item.title}
                       </h4>
                     </div>
 
-                    {/* Source URL if applicable */}
                     {item.source_url && (
                       <a
                         href={item.source_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-slate-500 hover:text-cyan-400 transition-colors flex-shrink-0"
-                        title="Open external source"
+                        className="text-[#52525b] hover:text-[#38bdf8] transition-colors flex-shrink-0"
+                        title="Open external link"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     )}
                   </div>
 
-                  {/* Content Preview */}
-                  <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">
+                  {/* Sanitized Text Preview */}
+                  <p className="text-xs text-[#8e929f] line-clamp-2 leading-relaxed">
                     {sanitizeDisplay(item.raw_content)}
                   </p>
                 </div>
 
-                {/* Footer Meta & Actions */}
-                <div className="flex items-center justify-between pt-3 mt-3 border-t border-white/5 text-[11px] text-slate-500">
+                {/* Footer Meta */}
+                <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-[#181a24] text-[11px] text-[#52525b]">
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1 font-mono text-slate-400">
-                      <Layers className="w-3 h-3 text-indigo-400" />
+                    <span className="flex items-center gap-1 font-mono text-[#71717a]">
+                      <Layers className="w-3 h-3 text-[#71717a]" />
                       <span>{item.chunk_count} {item.chunk_count === 1 ? 'chunk' : 'chunks'}</span>
                     </span>
 
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-slate-500" />
+                      <Calendar className="w-3 h-3" />
                       <span>{formatDate(item.created_at)}</span>
                     </span>
                   </div>
 
-                  {/* Action buttons */}
+                  {/* Actions */}
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => onViewItem(item)}
-                      className="p-1.5 rounded hover:bg-white/10 text-slate-400 hover:text-slate-200 transition-colors"
-                      title="Inspect full text & chunks"
+                      className="p-1 rounded text-[#71717a] hover:text-white hover:bg-[#1a1d28] transition-colors"
+                      title="Inspect full text"
                     >
                       <Eye className="w-3.5 h-3.5" />
                     </button>
@@ -227,8 +225,8 @@ export const SavedContentList: React.FC<SavedContentListProps> = ({
                     <button
                       onClick={() => handleDelete(item.id, item.title)}
                       disabled={isDeleting}
-                      className="p-1.5 rounded hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-colors disabled:opacity-50"
-                      title="Delete item and chunks"
+                      className="p-1 rounded text-[#71717a] hover:text-rose-400 hover:bg-rose-500/10 transition-colors disabled:opacity-50"
+                      title="Delete item"
                     >
                       {isDeleting ? (
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />

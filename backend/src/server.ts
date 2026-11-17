@@ -13,11 +13,7 @@ async function bootstrap() {
 
     // 3. Start HTTP server
     const server = app.listen(config.port, () => {
-      logger.info('========================================================');
-      logger.info(`  AI Knowledge Inbox Backend running on port ${config.port}`);
-      logger.info(`  Environment: ${config.nodeEnv}`);
-      logger.info(`  Health Check: http://localhost:${config.port}/health`);
-      logger.info('========================================================');
+      logger.info(`Knowledge Inbox API running on port ${config.port} [${config.nodeEnv}]`);
     });
 
     // Graceful shutdown handling
