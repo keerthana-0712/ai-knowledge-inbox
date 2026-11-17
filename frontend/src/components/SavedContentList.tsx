@@ -73,14 +73,14 @@ export const SavedContentList: React.FC<SavedContentListProps> = ({
   };
 
   return (
-    <div className="space-y-3.5">
+    <div className="space-y-4">
       {/* Header and Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2.5 border-b border-[#1c1f2b]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#e8e4dd]">
         <div className="flex items-center gap-2">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-[#a1a1aa]">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-[#111114]">
             Saved Knowledge
           </h2>
-          <span className="text-[11px] bg-[#141722] px-2 py-0.5 rounded text-[#71717a] font-mono border border-[#202433]">
+          <span className="text-[11px] bg-[#f0eee6] px-2 py-0.5 rounded-full text-[#555359] font-mono border border-[#e4e0d7] font-semibold">
             {filteredItems.length}
           </span>
         </div>
@@ -89,44 +89,44 @@ export const SavedContentList: React.FC<SavedContentListProps> = ({
         <div className="flex items-center gap-2">
           {/* Search */}
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-[#71717a] absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-[#78757d] absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Filter items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 pr-3 py-1 text-xs bg-[#0d0f15] border border-[#202433] rounded-md text-white placeholder-[#52525b] focus:outline-none focus:border-[#6100ff] w-40 sm:w-52"
+              className="pl-8 pr-3 py-1.5 text-xs bg-[#fcfbf9] border border-[#ddd9d1] rounded-md text-[#111114] placeholder-[#a7a5aa] focus:outline-none focus:border-[#6100ff] focus:bg-white w-40 sm:w-52 transition-all shadow-xs"
             />
           </div>
 
           {/* Type Tabs */}
-          <div className="flex items-center bg-[#0d0f15] p-0.5 rounded-md border border-[#202433] text-xs">
+          <div className="flex items-center bg-[#f0eee6] p-0.5 rounded-lg border border-[#e8e4dd] text-xs">
             <button
               onClick={() => onFilterChange('all')}
-              className={`px-2.5 py-1 rounded transition-colors ${
+              className={`px-3 py-1 rounded-md transition-all ${
                 activeFilter === 'all'
-                  ? 'bg-[#1e2230] text-white font-medium'
-                  : 'text-[#71717a] hover:text-[#d4d4d8]'
+                  ? 'bg-white text-[#111114] font-semibold shadow-card'
+                  : 'text-[#555359] hover:text-[#111114]'
               }`}
             >
               All
             </button>
             <button
               onClick={() => onFilterChange('note')}
-              className={`px-2.5 py-1 rounded transition-colors ${
+              className={`px-3 py-1 rounded-md transition-all ${
                 activeFilter === 'note'
-                  ? 'bg-[#1e2230] text-white font-medium'
-                  : 'text-[#71717a] hover:text-[#d4d4d8]'
+                  ? 'bg-white text-[#111114] font-semibold shadow-card'
+                  : 'text-[#555359] hover:text-[#111114]'
               }`}
             >
               Notes
             </button>
             <button
               onClick={() => onFilterChange('url')}
-              className={`px-2.5 py-1 rounded transition-colors ${
+              className={`px-3 py-1 rounded-md transition-all ${
                 activeFilter === 'url'
-                  ? 'bg-[#1e2230] text-white font-medium'
-                  : 'text-[#71717a] hover:text-[#d4d4d8]'
+                  ? 'bg-white text-[#111114] font-semibold shadow-card'
+                  : 'text-[#555359] hover:text-[#111114]'
               }`}
             >
               Links
@@ -138,43 +138,43 @@ export const SavedContentList: React.FC<SavedContentListProps> = ({
       {/* Grid of Items */}
       {isLoading ? (
         <div className="p-8 text-center space-y-2">
-          <Loader2 className="w-5 h-5 animate-spin text-[#8b3dff] mx-auto" />
-          <p className="text-xs text-[#71717a]">Loading saved items...</p>
+          <Loader2 className="w-5 h-5 animate-spin text-[#6100ff] mx-auto" />
+          <p className="text-xs text-[#78757d]">Loading saved items...</p>
         </div>
       ) : filteredItems.length === 0 ? (
-        <div className="p-10 rounded-lg border border-dashed border-[#202433] text-center space-y-1.5 bg-[#08090d]">
-          <FolderOpen className="w-6 h-6 text-[#52525b] mx-auto" />
-          <h3 className="text-xs font-medium text-[#a1a1aa]">No items found</h3>
-          <p className="text-[11px] text-[#52525b]">
+        <div className="p-10 rounded-xl border border-dashed border-[#ddd9d1] text-center space-y-2 bg-[#fcfbf9]">
+          <FolderOpen className="w-7 h-7 text-[#78757d] mx-auto" />
+          <h3 className="text-xs font-semibold text-[#111114]">No items found</h3>
+          <p className="text-xs text-[#78757d]">
             {searchQuery
               ? `No items matching "${searchQuery}".`
-              : 'Add your first note or URL to start building your index.'}
+              : 'Add your first note or URL to start building your knowledge base.'}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {filteredItems.map((item) => {
             const isDeleting = deletingId === item.id;
 
             return (
               <div
                 key={item.id}
-                className="group flex flex-col justify-between p-3.5 rounded-lg border border-[#1e222f] bg-[#0c0e14] hover:bg-[#10121b] hover:border-[#272b3b] transition-colors"
+                className="group flex flex-col justify-between p-4 rounded-xl border border-[#e8e4dd] bg-white hover:border-[#ddd9d1] hover:shadow-card-hover transition-all shadow-card"
               >
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {/* Title & Type Icon */}
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
                       {item.source_type === 'note' ? (
-                        <div className="p-1 rounded bg-[#6100ff]/10 text-[#9d66ff] border border-[#6100ff]/20 flex-shrink-0">
+                        <div className="p-1.5 rounded-md bg-[#f5f0ff] text-[#6100ff] border border-[#d9c6ff] flex-shrink-0">
                           <FileText className="w-3.5 h-3.5" />
                         </div>
                       ) : (
-                        <div className="p-1 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 flex-shrink-0">
+                        <div className="p-1.5 rounded-md bg-sky-50 text-sky-600 border border-sky-200 flex-shrink-0">
                           <Globe className="w-3.5 h-3.5" />
                         </div>
                       )}
-                      <h4 className="text-xs font-medium text-white truncate group-hover:text-[#a855f7] transition-colors">
+                      <h4 className="text-xs font-semibold text-[#111114] truncate group-hover:text-[#6100ff] transition-colors">
                         {item.title}
                       </h4>
                     </div>
@@ -184,7 +184,7 @@ export const SavedContentList: React.FC<SavedContentListProps> = ({
                         href={item.source_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#52525b] hover:text-[#38bdf8] transition-colors flex-shrink-0"
+                        className="text-[#78757d] hover:text-[#0284c7] transition-colors flex-shrink-0"
                         title="Open external link"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
@@ -193,21 +193,21 @@ export const SavedContentList: React.FC<SavedContentListProps> = ({
                   </div>
 
                   {/* Sanitized Text Preview */}
-                  <p className="text-xs text-[#8e929f] line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-[#555359] line-clamp-2 leading-relaxed">
                     {sanitizeDisplay(item.raw_content)}
                   </p>
                 </div>
 
                 {/* Footer Meta */}
-                <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-[#181a24] text-[11px] text-[#52525b]">
+                <div className="flex items-center justify-between pt-3 mt-3 border-t border-[#f0eee6] text-[11px] text-[#78757d]">
                   <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1 font-mono text-[#71717a]">
-                      <Layers className="w-3 h-3 text-[#71717a]" />
+                    <span className="flex items-center gap-1 font-mono text-[#555359]">
+                      <Layers className="w-3 h-3 text-[#78757d]" />
                       <span>{item.chunk_count} {item.chunk_count === 1 ? 'chunk' : 'chunks'}</span>
                     </span>
 
                     <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
+                      <Calendar className="w-3 h-3 text-[#78757d]" />
                       <span>{formatDate(item.created_at)}</span>
                     </span>
                   </div>
@@ -216,7 +216,7 @@ export const SavedContentList: React.FC<SavedContentListProps> = ({
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => onViewItem(item)}
-                      className="p-1 rounded text-[#71717a] hover:text-white hover:bg-[#1a1d28] transition-colors"
+                      className="p-1.5 rounded text-[#78757d] hover:text-[#111114] hover:bg-[#f0eee6] transition-colors"
                       title="Inspect full text"
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -225,7 +225,7 @@ export const SavedContentList: React.FC<SavedContentListProps> = ({
                     <button
                       onClick={() => handleDelete(item.id, item.title)}
                       disabled={isDeleting}
-                      className="p-1 rounded text-[#71717a] hover:text-rose-400 hover:bg-rose-500/10 transition-colors disabled:opacity-50"
+                      className="p-1.5 rounded text-[#78757d] hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
                       title="Delete item"
                     >
                       {isDeleting ? (

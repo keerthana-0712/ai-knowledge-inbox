@@ -50,13 +50,13 @@ export function App() {
   const handleIngestSuccess = () => {
     refreshItems();
     fetchHealth();
-    showNotification('Item indexed successfully.');
+    showNotification('Item indexed successfully into vector store.');
   };
 
   const handleDeleteItem = async (id: string) => {
     const res = await deleteItem(id);
     if (res.success) {
-      showNotification('Item removed.');
+      showNotification('Item and associated vector chunks removed.');
       fetchHealth();
       if (selectedItem?.id === id) {
         setSelectedItem(null);
@@ -68,14 +68,14 @@ export function App() {
   };
 
   return (
-    <div className="flex h-screen bg-[#050507] text-[#f4f4f6] overflow-hidden font-sans">
+    <div className="flex h-screen bg-[#fcfbf9] text-[#111114] overflow-hidden font-sans">
       {/* Toast Notification */}
       {notification && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 px-3.5 py-2 rounded-md shadow-lg border text-xs font-medium bg-[#11131a] border-[#222636] text-white">
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-dropdown border text-xs font-semibold bg-white border-[#e8e4dd] text-[#111114] animate-in fade-in slide-in-from-top-2">
           {notification.type === 'success' ? (
-            <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <CheckCircle className="w-4 h-4 text-emerald-600" />
           ) : (
-            <AlertCircle className="w-4 h-4 text-rose-400" />
+            <AlertCircle className="w-4 h-4 text-rose-600" />
           )}
           <span>{notification.message}</span>
         </div>
@@ -93,7 +93,7 @@ export function App() {
         healthInfo={healthInfo}
       />
 
-      {/* Main Content View */}
+      {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
           {/* Welcome Banner */}
@@ -105,7 +105,7 @@ export function App() {
           />
 
           {/* Ask AI Section */}
-          <div className="rounded-lg border border-[#1e222f] bg-[#0c0e14] p-5 shadow-sm">
+          <div className="rounded-xl border border-[#e8e4dd] bg-white p-6 shadow-card">
             <AskAISection
               onAsk={executeQuery}
               isQuerying={isQuerying}
@@ -113,7 +113,7 @@ export function App() {
             />
 
             {queryError && (
-              <div className="mt-3 p-3 rounded bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 flex items-center gap-2">
+              <div className="mt-3.5 p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{queryError}</span>
               </div>
@@ -129,7 +129,7 @@ export function App() {
           )}
 
           {/* Saved Content Section */}
-          <div className="rounded-lg border border-[#1e222f] bg-[#0c0e14] p-5 shadow-sm">
+          <div className="rounded-xl border border-[#e8e4dd] bg-white p-6 shadow-card">
             <SavedContentList
               items={items}
               activeFilter={activeFilter}

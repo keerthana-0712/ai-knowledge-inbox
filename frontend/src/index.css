@@ -4,26 +4,33 @@
 
 @layer base {
   body {
-    background-color: #050507;
-    color: #f4f4f6;
+    background-color: #fcfbf9;
+    color: #111114;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: #f0e6ff;
+    color: #6100ff;
   }
 }
 
 /* Scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1c1f2b;
-  border-radius: 4px;
+  background: #e2ded5;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2a2e40;
+  background: #cac5ba;
 }
 
 /* Turium interactive citation badge */
@@ -34,11 +41,11 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #9d66ff;
-  background: rgba(97, 0, 255, 0.12);
-  border: 1px solid rgba(97, 0, 255, 0.28);
+  color: #6100ff;
+  background-color: #f5f0ff;
+  border: 1px solid #d9c6ff;
   border-radius: 4px;
-  padding: 0 5px;
+  padding: 0.5px 6px;
   margin: 0 2px;
   cursor: pointer;
   vertical-align: baseline;
@@ -46,7 +53,7 @@
 }
 
 .citation-pill:hover {
-  background: rgba(97, 0, 255, 0.28);
+  background-color: #6100ff;
   color: #ffffff;
   border-color: #6100ff;
 }

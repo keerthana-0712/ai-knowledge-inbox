@@ -33,19 +33,19 @@ export const AskAISection: React.FC<AskAISectionProps> = ({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3.5">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-medium text-[#d4d4d8]">
-          Ask a question
+        <label className="text-xs font-semibold uppercase tracking-wider text-[#39383c]">
+          Ask Natural-Language Question
         </label>
-        <span className="text-[11px] text-[#71717a] font-mono">
-          Semantic Search • Grounded Citations
+        <span className="text-[11px] text-[#78757d] font-mono">
+          Semantic Cosine Retrieval • Anti-Hallucination RAG
         </span>
       </div>
 
       <form onSubmit={handleSubmit} className="relative">
-        <div className="relative flex items-center bg-[#0d0f15] border border-[#202433] focus-within:border-[#6100ff] rounded-lg transition-colors overflow-hidden focus-within:ring-1 focus-within:ring-[#6100ff]/30">
-          <div className="pl-3.5 text-[#71717a]">
+        <div className="relative flex items-center bg-[#fcfbf9] border border-[#ddd9d1] focus-within:border-[#6100ff] focus-within:bg-white rounded-lg transition-all overflow-hidden focus-within:ring-2 focus-within:ring-[#6100ff]/15 shadow-xs">
+          <div className="pl-3.5 text-[#78757d]">
             <Search className="w-4 h-4" />
           </div>
 
@@ -59,14 +59,14 @@ export const AskAISection: React.FC<AskAISectionProps> = ({
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             disabled={isQuerying}
-            className="w-full py-3 pl-3 pr-28 text-xs sm:text-sm bg-transparent text-white placeholder-[#52525b] focus:outline-none"
+            className="w-full py-3 pl-3 pr-28 text-xs sm:text-sm bg-transparent text-[#111114] placeholder-[#a7a5aa] focus:outline-none"
           />
 
           <div className="absolute right-2 flex items-center gap-1.5">
             <button
               type="submit"
               disabled={isQuerying || !question.trim()}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-[#6100ff] hover:bg-[#5200db] disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-md transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-[#6100ff] hover:bg-[#5200db] disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-md transition-colors shadow-sm"
             >
               {isQuerying ? (
                 <>
@@ -76,7 +76,7 @@ export const AskAISection: React.FC<AskAISectionProps> = ({
               ) : (
                 <>
                   <span>Ask</span>
-                  <CornerDownLeft className="w-3 h-3 text-[#d4d4d8]" />
+                  <CornerDownLeft className="w-3 h-3 text-white/80" />
                 </>
               )}
             </button>
@@ -86,16 +86,16 @@ export const AskAISection: React.FC<AskAISectionProps> = ({
 
       {/* Suggested Query Chips */}
       <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-        <span className="text-[11px] text-[#71717a] font-medium mr-1">Suggestions:</span>
+        <span className="text-[11px] text-[#78757d] font-medium mr-1">Suggestions:</span>
         {EXAMPLE_QUESTIONS.map((example, i) => (
           <button
             key={i}
             onClick={() => handleSelectExample(example)}
             disabled={isQuerying}
-            className="text-[11px] px-2 py-0.5 rounded bg-[#131620] hover:bg-[#1a1e2b] border border-[#232736] text-[#a1a1aa] hover:text-white transition-colors flex items-center gap-1 disabled:opacity-50"
+            className="text-[11px] px-2.5 py-1 rounded-full bg-white hover:bg-[#f5f0ff] border border-[#e8e4dd] hover:border-[#d9c6ff] text-[#39383c] hover:text-[#6100ff] transition-all flex items-center gap-1 disabled:opacity-50 shadow-xs"
           >
             <span>{example}</span>
-            <ArrowRight className="w-2.5 h-2.5 text-[#71717a]" />
+            <ArrowRight className="w-2.5 h-2.5 text-[#78757d]" />
           </button>
         ))}
       </div>
