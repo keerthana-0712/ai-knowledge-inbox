@@ -23,56 +23,12 @@ class IngestionService {
       throw new Error('Note content cannot be empty.');
     }
 
-    const itemId = randomUUID();
-    const now = new Date().toISOString();
-
-    // 1. Chunk content
-    const textChunks = chunkText(
-      trimmedContent,
-      config.chunking.chunkSize,
-      config.chunking.chunkOverlap
-    );
-
-    if (textChunks.length === 0) {
-      throw new Error('Unable to extract meaningful text chunks from note content.');
-    }
-
-    // 2. Generate embeddings for chunks
-    logger.info(`[IngestionService] Generating embeddings for ${textChunks.length} note chunks...`);
-    const chunkContents = textChunks.map((c) => c.content);
-    const embeddings = await embeddingService.generateEmbeddings(chunkContents);
-
-    // 3. Persist item to database
-    const item: Item = {
-      id: itemId,
+    return this.indexIngestedContent({
       title: trimmedTitle,
-      source_type: 'note',
-      source_url: null,
-      raw_content: trimmedContent,
-      created_at: now,
-    };
-
-    dbService.insertItem(item);
-
-    // 4. Persist chunks to database
-    const dbChunks = textChunks.map((c, i) => ({
-      id: randomUUID(),
-      item_id: itemId,
-      chunk_index: c.index,
-      chunk_content: c.content,
-      embedding: embeddings[i],
-      created_at: now,
-    }));
-
-    dbService.insertChunks(dbChunks);
-
-    logger.info(`[IngestionService] Successfully ingested note '${trimmedTitle}' (${textChunks.length} chunks).`);
-
-    return {
-      item: { ...item, chunk_count: textChunks.length },
-      chunksCreated: textChunks.length,
-      message: `Note '${trimmedTitle}' saved and indexed successfully.`,
-    };
+      sourceType: 'note',
+      sourceUrl: null,
+      content: trimmedContent,
+    });
   }
 
   /**
@@ -88,6 +44,58 @@ class IngestionService {
     }
 
     logger.info(`[IngestionService] Fetching URL: ${trimmedUrl}`);
+
+    // Check for ChatGPT shared chat link (Single Page App with public JSON backend)
+    const chatGptMatch = trimmedUrl.match(/chatgpt\.com\/share\/([a-zA-Z0-9-]+)/);
+    if (chatGptMatch) {
+      const shareId = chatGptMatch[1];
+      try {
+        const apiUrl = `https://chatgpt.com/backend-api/share/${shareId}`;
+        const chatGptRes = await fetch(apiUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AI-Knowledge-Inbox/1.0 (+https://turium.ai)',
+            Accept: 'application/json',
+          },
+        });
+
+        if (chatGptRes.ok) {
+          const chatData: any = await chatGptRes.json();
+          const autoTitle = chatData.title || 'ChatGPT Shared Conversation';
+          const parts: string[] = [];
+
+          if (chatData.mapping) {
+            for (const key of Object.keys(chatData.mapping)) {
+              const msg = chatData.mapping[key]?.message;
+              if (msg && msg.content && Array.isArray(msg.content.parts)) {
+                for (const part of msg.content.parts) {
+                  if (
+                    typeof part === 'string' &&
+                    part.trim().length > 0 &&
+                    !part.includes('The output of this plugin was redacted')
+                  ) {
+                    const role = msg.author?.role === 'user' ? 'User' : 'Assistant';
+                    parts.push(`${role}:\n${part.trim()}`);
+                  }
+                }
+              }
+            }
+          }
+
+          if (parts.length > 0) {
+            const conversationText = parts.join('\n\n---\n\n');
+            const pageTitle = customTitle?.trim() || autoTitle;
+            return this.indexIngestedContent({
+              title: pageTitle,
+              sourceType: 'url',
+              sourceUrl: trimmedUrl,
+              content: conversationText,
+            });
+          }
+        }
+      } catch (err) {
+        logger.warn('[IngestionService] Failed to extract via ChatGPT backend API, falling back to standard HTML parsing', err);
+      }
+    }
 
     // 2. Fetch page content with timeout and user-agent
     let response: Response;
@@ -163,42 +171,56 @@ class IngestionService {
 
     if (cleanedContent.length < 30) {
       throw new Error(
-        'Could not extract sufficient readable text content from the provided webpage.'
+        'Could not extract sufficient readable text content from the provided webpage. This page may require client-side JavaScript execution or is protected by a login or captcha. Tip: You can copy and paste the text into an "Add Note" to index it immediately!'
       );
     }
 
+    return this.indexIngestedContent({
+      title: pageTitle.slice(0, 200),
+      sourceType: 'url',
+      sourceUrl: trimmedUrl,
+      content: cleanedContent,
+    });
+  }
+
+  /**
+   * Helper method to chunk, vectorize, and persist extracted content into SQLite.
+   */
+  private async indexIngestedContent(params: {
+    title: string;
+    sourceType: 'note' | 'url';
+    sourceUrl: string | null;
+    content: string;
+  }): Promise<IngestResult> {
+    const { title, sourceType, sourceUrl, content } = params;
     const itemId = randomUUID();
     const now = new Date().toISOString();
 
-    // 4. Chunk extracted text
     const textChunks = chunkText(
-      cleanedContent,
+      content,
       config.chunking.chunkSize,
       config.chunking.chunkOverlap
     );
 
     if (textChunks.length === 0) {
-      throw new Error('Unable to generate chunks from the extracted web content.');
+      throw new Error('Unable to generate semantic chunks from the content.');
     }
 
-    // 5. Generate embeddings
-    logger.info(`[IngestionService] Generating embeddings for ${textChunks.length} URL chunks...`);
+    logger.info(`[IngestionService] Generating embeddings for ${textChunks.length} chunks...`);
     const chunkContents = textChunks.map((c) => c.content);
     const embeddings = await embeddingService.generateEmbeddings(chunkContents);
 
-    // 6. Persist item to database
     const item: Item = {
       id: itemId,
-      title: pageTitle.slice(0, 200),
-      source_type: 'url',
-      source_url: trimmedUrl,
-      raw_content: cleanedContent,
+      title: title.slice(0, 200),
+      source_type: sourceType,
+      source_url: sourceUrl,
+      raw_content: content,
       created_at: now,
     };
 
     dbService.insertItem(item);
 
-    // 7. Persist chunks
     const dbChunks = textChunks.map((c, i) => ({
       id: randomUUID(),
       item_id: itemId,
@@ -210,12 +232,12 @@ class IngestionService {
 
     dbService.insertChunks(dbChunks);
 
-    logger.info(`[IngestionService] Successfully ingested URL '${trimmedUrl}' (${textChunks.length} chunks).`);
+    logger.info(`[IngestionService] Successfully ingested ${sourceType} '${title}' (${textChunks.length} chunks).`);
 
     return {
       item: { ...item, chunk_count: textChunks.length },
       chunksCreated: textChunks.length,
-      message: `Webpage '${pageTitle}' saved and indexed successfully.`,
+      message: `${sourceType === 'note' ? 'Note' : 'Webpage'} '${title}' saved and indexed successfully.`,
     };
   }
 }
