@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { WelcomeBanner } from './components/WelcomeBanner';
+import { WelcomeIntro } from './components/WelcomeIntro';
 import { AskAISection } from './components/AskAISection';
 import { AnswerDisplay } from './components/AnswerDisplay';
 import { SavedContentList } from './components/SavedContentList';
@@ -22,6 +23,7 @@ export function App() {
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
   const [isHealthModalOpen, setIsHealthModalOpen] = useState(false);
+  const [isWelcomeIntroOpen, setIsWelcomeIntroOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
   const [healthInfo, setHealthInfo] = useState<HealthInfo | null>(null);
@@ -43,6 +45,12 @@ export function App() {
 
   useEffect(() => {
     fetchHealth();
+    // Launch welcoming intro on initial load if not yet viewed this session
+    const hasSeenWelcome = sessionStorage.getItem('turium_welcome_intro_seen');
+    if (!hasSeenWelcome) {
+      setIsWelcomeIntroOpen(true);
+      sessionStorage.setItem('turium_welcome_intro_seen', 'true');
+    }
   }, []);
 
   const totalChunks = items.reduce((acc, i) => acc + (i.chunk_count || 0), 0);
@@ -69,9 +77,15 @@ export function App() {
 
   return (
     <div className="flex h-screen bg-[#fcfbf9] text-[#111114] overflow-hidden font-sans">
+      {/* Interactive Welcoming Intro Sequence */}
+      <WelcomeIntro
+        isOpen={isWelcomeIntroOpen}
+        onComplete={() => setIsWelcomeIntroOpen(false)}
+      />
+
       {/* Toast Notification */}
       {notification && (
-        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 rounded-lg shadow-dropdown border text-xs font-semibold bg-white border-[#e8e4dd] text-[#111114] animate-modal-enter">
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-dropdown border text-xs font-semibold bg-white border-[#e8e4dd] text-[#111114] animate-modal-enter">
           {notification.type === 'success' ? (
             <CheckCircle className="w-4 h-4 text-emerald-600" />
           ) : (
@@ -90,6 +104,7 @@ export function App() {
         onOpenAddUrl={() => setIsUrlModalOpen(true)}
         onSelectItem={(item) => setSelectedItem(item)}
         onOpenHealth={() => setIsHealthModalOpen(true)}
+        onReplayWelcome={() => setIsWelcomeIntroOpen(true)}
         healthInfo={healthInfo}
       />
 
@@ -103,12 +118,13 @@ export function App() {
           <WelcomeBanner
             onAddNote={() => setIsNoteModalOpen(true)}
             onAddUrl={() => setIsUrlModalOpen(true)}
+            onReplayWelcome={() => setIsWelcomeIntroOpen(true)}
             itemCount={items.length}
             chunkCount={totalChunks}
           />
 
           {/* Ask AI Section */}
-          <div className="rounded-xl border border-[#e8e4dd] bg-white p-6 shadow-card transition-all duration-300 hover:shadow-card-hover animate-welcome-2">
+          <div className="rounded-2xl border border-[#e8e4dd] bg-white p-6 shadow-card transition-all duration-300 hover:shadow-card-hover animate-welcome-2">
             <AskAISection
               onAsk={executeQuery}
               isQuerying={isQuerying}
@@ -117,7 +133,7 @@ export function App() {
             />
 
             {queryError && (
-              <div className="mt-3.5 p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium flex items-center gap-2">
+              <div className="mt-3.5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{queryError}</span>
               </div>
@@ -135,7 +151,7 @@ export function App() {
           )}
 
           {/* Saved Content Section */}
-          <div className="rounded-xl border border-[#e8e4dd] bg-white p-6 shadow-card transition-all duration-300 hover:shadow-card-hover animate-welcome-3">
+          <div className="rounded-2xl border border-[#e8e4dd] bg-white p-6 shadow-card transition-all duration-300 hover:shadow-card-hover animate-welcome-3">
             <SavedContentList
               items={items}
               activeFilter={activeFilter}

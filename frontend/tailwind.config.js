@@ -28,20 +28,27 @@ export default {
         },
       },
       fontFamily: {
-        sans: [
-          'Inter',
+        display: [
+          '"Outfit"',
+          '"Plus Jakarta Sans"',
           '-apple-system',
           'BlinkMacSystemFont',
-          '"Segoe UI"',
-          'Roboto',
+          'sans-serif',
+        ],
+        sans: [
+          '"Plus Jakarta Sans"',
+          '"Inter"',
+          '-apple-system',
+          'BlinkMacSystemFont',
           'sans-serif',
         ],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       boxShadow: {
         'card': '0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02)',
-        'card-hover': '0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04)',
-        'dropdown': '0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04)',
+        'card-hover': '0 6px 18px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.03)',
+        'dropdown': '0 12px 30px -4px rgba(0, 0, 0, 0.09), 0 8px 12px -6px rgba(0, 0, 0, 0.04)',
+        'glow-purple': '0 0 25px -4px rgba(97, 0, 255, 0.35)',
       },
     },
   },
