@@ -1,283 +1,353 @@
 # AI Knowledge Inbox
 
-> **Enterprise-grade, lightweight personal AI knowledge management application powered by semantic search and Retrieval-Augmented Generation (RAG).**  
-> *Developed for the Turium AI (Enterprise AI) Full Stack Developer technical assessment.*
+> **Enterprise-grade, lightweight personal AI knowledge management application powered by Semantic Search and Retrieval-Augmented Generation (RAG).**
+>
+> Developed for the **Turium AI (Enterprise AI) Full Stack Developer Technical Assessment**.
 
 ---
 
 ## 1. Project Overview
 
-**AI Knowledge Inbox** is a full-stack, single-user knowledge management system designed to ingest, index, and converse with personal notes and web articles. 
+**AI Knowledge Inbox** is a full-stack, single-user knowledge management application designed to ingest, index, search, and interact with personal notes and web articles using Artificial Intelligence.
 
-Instead of relying on heavy, complex multi-container infrastructures or external vector databases, the application implements an intentional **in-engine RAG architecture**:
-- Raw text and HTML web pages are extracted server-side with strict **SSRF guards**.
-- Content is segmented using a **paragraph-aware recursive chunking algorithm** with contextual overlap.
-- High-dimensional embeddings are generated and stored in a normalized **SQLite** database.
-- Natural-language queries trigger in-memory **cosine similarity vector retrieval**, ranking and assembling the top relevant chunks into a strictly bounded prompt.
-- The LLM generates factual, grounded responses containing **clickable inline citations (`[1]`, `[2]`)** backed by verifiable source snippets.
+Instead of relying on complex multi-container infrastructure or external vector databases, the application implements an efficient **in-engine RAG architecture**.
 
-The application works out of the box with zero external dependencies (supporting deterministic local vectorization and extractive grounding) and seamlessly upgrades to **OpenAI `text-embedding-3-small` and `gpt-4o-mini`** whenever an `OPENAI_API_KEY` is provided.
+### How It Works
+
+- **Content Ingestion:** Extracts raw text from notes and HTML web pages using server-side processing with SSRF protection.
+- **Semantic Chunking:** Splits content using a paragraph-aware recursive chunking algorithm with contextual overlap.
+- **Vector Embeddings:** Generates and stores normalized embedding vectors directly in SQLite.
+- **Semantic Retrieval:** Performs in-memory cosine similarity searches to identify the most relevant content.
+- **Grounded AI Responses:** Constructs context-bounded prompts and generates answers using retrieved information.
+- **Source Citations:** Provides clickable inline citations (`[1]`, `[2]`) linked to supporting source snippets.
+
+The application supports two operating modes:
+
+1. **Local Mode:** Uses deterministic local vectorization and extractive grounding without requiring an external AI API key.
+2. **OpenAI Mode:** Integrates OpenAI `text-embedding-3-small` and `gpt-4o-mini` when an `OPENAI_API_KEY` is configured.
 
 ---
 
 ## 2. Problem Statement
 
-Modern knowledge workers collect notes, documentation, articles, and research across disjointed tools. Traditional keyword search (e.g. `Ctrl+F` or SQL `LIKE '%query%'`) fails when queries use different vocabulary from the source text (e.g., asking *"How do qubits achieve parallel states?"* when the document discusses *"quantum superposition"*).
+Modern knowledge workers collect notes, documentation, articles, and research across multiple disconnected platforms.
 
-Furthermore, standard LLM chat interfaces suffer from hallucinations, data cutoffs, and an inability to cite authoritative user sources. 
+Traditional keyword-based search methods, such as `Ctrl + F` or SQL `LIKE` queries, often fail when users search using different terminology from the original content.
 
-**AI Knowledge Inbox** bridges this gap by providing:
-1. **Unified Ingestion:** Ingest both freeform text notes and web URLs.
-2. **True Semantic Retrieval:** Match meaning rather than exact keywords via vector embeddings.
-3. **Grounded RAG:** Restrict LLM generation exclusively to retrieved context, complete with citation badges directly linked to source chunks.
-4. **Zero-Bloat Architecture:** High efficiency on SQLite without Docker or external vector DBs.
+For example, a user searching for:
+
+"How do qubits achieve parallel states?"
+
+may not find relevant information in a document discussing:
+
+"Quantum Superposition."
+
+Additionally, traditional LLM chat interfaces can produce hallucinations, rely on outdated knowledge, and fail to provide citations from a user's personal sources.
+
+### Proposed Solution
+
+AI Knowledge Inbox addresses these challenges through:
+
+1. **Unified Ingestion:** Save personal notes and web URLs in one centralized application.
+2. **Semantic Search:** Retrieve information based on meaning rather than exact keyword matches.
+3. **Grounded RAG:** Generate answers using retrieved source content rather than relying entirely on the model's internal knowledge.
+4. **Source Citations:** Provide verifiable references linked directly to the original content.
+5. **Lightweight Architecture:** Use SQLite for persistent storage without requiring Docker or an external vector database.
 
 ---
 
 ## 3. Key Features
 
-- **Text Note Ingestion:** Save markdown and plain-text notes with title and timestamp.
-- **Server-Side URL Scraping & Readability:** Fetches web pages server-side, strips non-content tags (`<nav>`, `<script>`, `<footer>`, `style`), extracts main article text, and records metadata.
-- **SSRF Protection:** Rejects requests to loopback addresses (`127.0.0.1`, `localhost`), private subnets (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), and cloud metadata APIs (`169.254.169.254`).
-- **Semantic Chunking:** Paragraph-aware sliding window (~600 chars, 100-char overlap) preserving semantic coherence across splits.
-- **SQLite Vector Store:** Serialized vector embeddings stored directly in SQLite with foreign-key cascade deletions and WAL mode.
-- **Cosine Similarity Semantic Search:** Vector similarity ranking computing normalized dot products over candidate chunks.
-- **Grounded Answer Generation:** Bounded context prompt instructing the LLM to refuse guessing and produce numbered citations `[1]`, `[2]`.
-- **Interactive Citations:** Clickable inline citations jump directly to the supporting source snippet and expand its content.
-- **Minimalist SaaS UI:** Dark-mode interface inspired by Linear and Notion, built with Tailwind CSS, Lucide icons, and responsive layouts.
-- **Comprehensive Test Suite:** 27 unit and end-to-end integration tests covering vector math, chunking, SSRF defense, RAG logic, and REST APIs.
+### Knowledge Management
+- Save plain-text and Markdown notes with titles and timestamps.
+- Ingest web articles through URLs.
+- View and manage saved knowledge.
+- Delete saved items with automatic associated chunk cleanup.
+
+### Intelligent Content Processing
+- Server-side URL fetching and HTML parsing using Cheerio.
+- Removes irrelevant HTML elements such as navigation, scripts, styles, and footers.
+- Extracts meaningful article content.
+- Implements SSRF protection against localhost, private network addresses, and cloud metadata endpoints.
+- Uses paragraph-aware recursive chunking with contextual overlap.
+
+### Semantic Search and RAG
+- Generates vector embeddings using OpenAI or a deterministic local fallback.
+- Stores serialized embeddings in SQLite.
+- Performs cosine similarity-based semantic retrieval.
+- Retrieves the most relevant content chunks.
+- Constructs bounded context for grounded AI responses.
+- Supports numbered citations linked to original source snippets.
+
+### User Interface
+- Minimalist SaaS-inspired dark interface.
+- Responsive React and Tailwind CSS layout.
+- Interactive source citations.
+- Expandable source snippets.
+- Match-percentage indicators.
+- Knowledge management sidebar and quick actions.
+
+### Reliability and Testing
+- Zod-based request validation.
+- Centralized error handling.
+- Structured request logging.
+- SQLite foreign-key constraints and WAL mode.
+- Automated unit and integration tests.
 
 ---
 
 ## 4. Technology Stack
 
-| Layer | Technology | Rationale |
-| :--- | :--- | :--- |
-| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS | Fast HMR, type safety, minimal footprint, modern SaaS aesthetic |
-| **Icons** | Lucide React | Consistent, lightweight iconography matching Linear/Notion styling |
-| **Backend** | Node.js (v22+ / v26), Express.js, TypeScript | Production-standard REST architecture, modular design, fast execution |
-| **Database** | SQLite via `node:sqlite` (`DatabaseSync`) | Zero-dependency, file-based, synchronous, ACID-compliant, native WAL |
-| **Validation** | Zod | Runtime schema validation for ingestion and query payloads |
-| **Web Scraping** | Cheerio + Native Fetch | Server-side DOM parsing, noise stripping, and readability extraction |
-| **AI / Embeddings** | OpenAI SDK (`text-embedding-3-small`, `gpt-4o-mini`) | State-of-the-art embedding density and fast grounded chat completion |
-| **Fallback Engine** | 256-D Deterministic Subword Vectorizer + Extractive RAG | Allows instant evaluation without requiring an API key or external service |
-| **Testing** | Vitest | Lightning-fast test runner for unit and API integration tests |
+| Layer | Technology | Purpose |
+|---|---|---|
+| Frontend | React 18 | Component-based UI |
+| Language | TypeScript | Type safety |
+| Build Tool | Vite | Fast development and HMR |
+| Styling | Tailwind CSS | Responsive UI |
+| Icons | Lucide React | Lightweight icons |
+| Backend | Node.js | Server-side runtime |
+| Framework | Express.js | REST API development |
+| Database | SQLite (`node:sqlite`) | Persistent storage |
+| Validation | Zod | Runtime request validation |
+| Web Scraping | Cheerio | HTML parsing and extraction |
+| AI Embeddings | OpenAI `text-embedding-3-small` | Semantic vector generation |
+| AI Generation | OpenAI `gpt-4o-mini` | Grounded answer generation |
+| Fallback Engine | 256-dimensional deterministic vectorizer | Local semantic retrieval |
+| Testing | Vitest | Unit and integration testing |
 
 ---
 
 ## 5. System Architecture
 
-```
-                       +---------------------------------------+
-                       |           Browser Client              |
-                       |   (React 18 + Vite + Tailwind CSS)    |
-                       +-------------------+-------------------+
-                                           |  REST HTTP / JSON
-                                           v
-                       +---------------------------------------+
-                       |            Express Backend            |
-                       |       (TypeScript REST API Server)    |
-                       +-------------------+-------------------+
-                                           |
-        +----------------------------------+----------------------------------+
-        |                                  |                                  |
-        v                                  v                                  v
-+---------------+                  +---------------+                  +---------------+
-| Ingestion Svc |                  | Vector Engine |                  |  RAG Pipeline |
-|  - Cheerio    |                  |  - Cosine Sim |                  |  - Context    |
-|  - SSRF Guard |                  |  - Top-K Rank |                  |  - OpenAI LLM |
-|  - Chunker    |                  +-------+-------+                  |  - Citations  |
-+-------+-------+                          |                          +-------+-------+
-        |                                  |                                  |
-        +----------------------------------+----------------------------------+
-                                           |
-                                           v
-                       +---------------------------------------+
-                       |            SQLite Database            |
-                       |  - items (Notes & URLs)               |
-                       |  - chunks (Text Chunks + Vectors)     |
-                       |  - PRAGMA journal_mode = WAL          |
-                       +---------------------------------------+
+The application follows a modular client-server architecture.
+
+```text
+                 +--------------------------------+
+                 |         Browser Client         |
+                 |   React + TypeScript + Vite    |
+                 +---------------+----------------+
+                                 |
+                           REST HTTP / JSON
+                                 |
+                                 v
+                 +--------------------------------+
+                 |        Express Backend         |
+                 |       TypeScript REST API      |
+                 +---------------+----------------+
+                                 |
+          +----------------------+----------------------+
+          |                      |                      |
+          v                      v                      v
+ +----------------+    +----------------+    +----------------+
+ | Ingestion Svc  |    | Vector Engine  |    | RAG Pipeline   |
+ |                |    |                |    |                |
+ | Cheerio        |    | Cosine Similarity|   | Context Build  |
+ | SSRF Protection|    | Top-K Ranking  |    | OpenAI LLM     |
+ | Text Chunking  |    | Vector Retrieval|   | Citations      |
+ +-------+--------+    +-------+--------+    +-------+--------+
+         |                     |                     |
+         +---------------------+---------------------+
+                               |
+                               v
+                 +--------------------------------+
+                 |         SQLite Database        |
+                 |                                |
+                 |  items: Notes and URLs         |
+                 |  chunks: Text and Embeddings   |
+                 |  WAL Mode                      |
+                 +--------------------------------+
 ```
 
 ---
 
 ## 6. RAG (Retrieval-Augmented Generation) Workflow
 
+The application uses Retrieval-Augmented Generation to answer questions based on the user's saved knowledge.
+
+### Processing Flow
+
+```text
+       [ User Enters a Question ]
+                   |
+                   v
+           [ POST /query ]
+                   |
+                   v
+       [ Generate Query Embedding ]
+                   |
+          +--------+--------+
+          |                 |
+          v                 v
+      OpenAI API       Local Vectorizer
+          |                 |
+          +--------+--------+
+                   |
+                   v
+       [ Cosine Similarity Search ]
+                   |
+                   v
+          [ Retrieve Top-K Chunks ]
+                   |
+                   v
+           [ Context Assembly ]
+                   |
+                   v
+          [ Grounded LLM Prompt ]
+                   |
+                   v
+          [ Generate AI Answer ]
+                   |
+                   v
+          [ Attach Source Citations ]
+                   |
+                   v
+          [ Display Interactive UI ]
 ```
-[ User enters question in UI ]
-               │
-               ▼
-   [ POST /query endpoint ]
-               │
-               ▼
-[ Generate Query Embedding ] ──────► (OpenAI text-embedding-3-small or fallback vectorizer)
-               │
-               ▼
- [ Vector Cosine Similarity ] ──────► Scans stored chunk embeddings in SQLite
-               │                      cos(θ) = (A · B) / (||A|| * ||B||)
-               ▼
- [ Retrieve Top-K Chunks ]   ──────► Filter by threshold (≥ 0.15), slice top 4-5 chunks
-               │
-               ▼
- [ Context Construction ]    ──────► Format numbered snippets:
-               │                      [Source 1: "{title}"] {content}
-               ▼
-   [ Grounded LLM Prompt ]   ──────► System instructions:
-               │                      - Answer ONLY from context
-               │                      - Refuse to guess if information is absent
-               │                      - Add bracketed citations like [1]
-               ▼
- [ Answer + Sources Response ]
-               │
-               ▼
-[ Interactive UI Presentation ] ────► Render answer with clickable pills [1], [2],
-                                      match % badges, and expandable source snippets
-```
+
+### RAG Processing Steps
+
+**Step 1: Query Embedding**
+
+The user's question is converted into a numerical vector using OpenAI embeddings or the local fallback vectorizer.
+
+**Step 2: Semantic Retrieval**
+
+The generated query vector is compared with stored content embeddings using cosine similarity.
+
+**Step 3: Top-K Selection**
+
+The most relevant chunks are selected based on similarity scores and retrieval limits.
+
+**Step 4: Context Construction**
+
+Retrieved chunks are organized into numbered source references and passed to the generation layer.
+
+**Step 5: Grounded Generation**
+
+The LLM receives instructions to answer exclusively from the supplied context and avoid unsupported assumptions.
+
+**Step 6: Citation Rendering**
+
+The generated response includes numbered citations such as `[1]` and `[2]`, which users can click to inspect supporting content.
+
+### Cosine Similarity Formula
+
+\[
+\text{Similarity}(A,B)=
+\frac{A\cdot B}{\|A\|\|B\|}
+\]
+
+This measures the similarity between two vectors based on their directional alignment.
 
 ---
 
 ## 7. Database Schema
 
-The database uses SQLite with Write-Ahead Logging (`WAL`) and foreign-key cascade constraints.
+The application uses SQLite for persistent storage.
+
+The database is configured with:
+
+- Write-Ahead Logging (WAL).
+- Foreign-key constraints.
+- Automatic cascade deletion.
+- Indexes for efficient lookups.
+
+### Items Table
+
+Stores original notes and ingested web pages.
+
+```sql
+CREATE TABLE IF NOT EXISTS items (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    source_type TEXT NOT NULL
+        CHECK(source_type IN ('note', 'url')),
+    source_url TEXT,
+    raw_content TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+```
+
+### Chunks Table
+
+Stores individual content chunks and their serialized embedding vectors.
+
+```sql
+CREATE TABLE IF NOT EXISTS chunks (
+    id TEXT PRIMARY KEY,
+    item_id TEXT NOT NULL,
+    chunk_index INTEGER NOT NULL,
+    chunk_content TEXT NOT NULL,
+    embedding TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (item_id)
+        REFERENCES items(id)
+        ON DELETE CASCADE
+);
+```
+
+### Database Configuration
 
 ```sql
 PRAGMA foreign_keys = ON;
 PRAGMA journal_mode = WAL;
 
--- Stores original notes and ingested web pages
-CREATE TABLE IF NOT EXISTS items (
-  id TEXT PRIMARY KEY,
-  title TEXT NOT NULL,
-  source_type TEXT NOT NULL CHECK(source_type IN ('note', 'url')),
-  source_url TEXT,
-  raw_content TEXT NOT NULL,
-  created_at TEXT NOT NULL
-);
+CREATE INDEX IF NOT EXISTS idx_chunks_item_id
+ON chunks(item_id);
 
--- Stores semantic text chunks and serialized embedding vectors
-CREATE TABLE IF NOT EXISTS chunks (
-  id TEXT PRIMARY KEY,
-  item_id TEXT NOT NULL,
-  chunk_index INTEGER NOT NULL,
-  chunk_content TEXT NOT NULL,
-  embedding TEXT NOT NULL, -- JSON array of floats (e.g. 1536d or 256d)
-  created_at TEXT NOT NULL,
-  FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
-);
+CREATE INDEX IF NOT EXISTS idx_items_created_at
+ON items(created_at DESC);
 
--- Indexes for fast lookup and cascade deletions
-CREATE INDEX IF NOT EXISTS idx_chunks_item_id ON chunks(item_id);
-CREATE INDEX IF NOT EXISTS idx_items_created_at ON items(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_items_source_type ON items(source_type);
+CREATE INDEX IF NOT EXISTS idx_items_source_type
+ON items(source_type);
 ```
 
 ---
 
-## 8. API Documentation
+## 8. REST API Documentation
 
-### Base URL
-`http://localhost:5000` (or through Vite development proxy `/api`)
+**Base URL:** `http://localhost:5000`
 
----
+The frontend communicates with the backend through REST APIs, using the Vite development proxy where configured.
 
-### `GET /health`
-Returns backend health, database connection state, item/chunk metrics, and active AI model.
+### 8.1 GET /health
 
-**Response `200 OK`:**
-```json
-{
-  "status": "healthy",
-  "timestamp": "2026-11-17T11:34:54.351Z",
-  "database": {
-    "status": "connected",
-    "itemsCount": 3,
-    "chunksCount": 8
-  },
-  "ai": {
-    "provider": "openai",
-    "configured": true,
-    "embeddingModel": "text-embedding-3-small",
-    "chatModel": "gpt-4o-mini"
-  }
-}
-```
+Returns backend health information, database status, item and chunk counts, and active AI configuration.
 
----
+### 8.2 POST /ingest
 
-### `POST /ingest`
-Ingests a plain-text note or a website URL, chunks the content, computes vector embeddings, and stores them in SQLite.
+Ingests a text note or website URL, processes its content, generates embeddings, and stores the result in SQLite.
 
-#### A. Ingesting a Note
-**Request Body:**
+**Example: Adding a Note**
+
 ```json
 {
   "type": "note",
   "title": "Turium AI Architecture Note",
-  "content": "Turium AI builds autonomous enterprise intelligence platforms with strict verification loops."
+  "content": "Enterprise AI knowledge management using RAG."
 }
 ```
 
-#### B. Ingesting a URL
-**Request Body:**
+**Example: Adding a URL**
+
 ```json
 {
   "type": "url",
   "url": "https://en.wikipedia.org/wiki/Artificial_intelligence",
-  "title": "Wikipedia - Artificial Intelligence"
+  "title": "Artificial Intelligence"
 }
 ```
 
-**Response `201 Created`:**
-```json
-{
-  "success": true,
-  "data": {
-    "item": {
-      "id": "e83fbfa2-7b1f-4f81-a951-87a4ff49576c",
-      "title": "Turium AI Architecture Note",
-      "source_type": "note",
-      "source_url": null,
-      "raw_content": "Turium AI builds autonomous enterprise intelligence platforms...",
-      "created_at": "2026-11-17T11:34:23.894Z",
-      "chunk_count": 1
-    },
-    "chunksCreated": 1,
-    "message": "Note 'Turium AI Architecture Note' saved and indexed successfully."
-  }
-}
-```
+### 8.3 GET /items
 
----
+Retrieves all saved notes and URLs, including their metadata and chunk counts.
 
-### `GET /items`
-Retrieves all saved notes and URLs ordered by creation date descending, including chunk counts.
+### 8.4 POST /query
 
-**Response `200 OK`:**
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": "e83fbfa2-7b1f-4f81-a951-87a4ff49576c",
-      "title": "Turium AI Architecture Note",
-      "source_type": "note",
-      "source_url": null,
-      "raw_content": "Turium AI builds autonomous enterprise intelligence platforms...",
-      "created_at": "2026-11-17T11:34:23.894Z",
-      "chunk_count": 1
-    }
-  ],
-  "count": 1
-}
-```
+Performs semantic retrieval and generates a grounded response with source citations.
 
----
+**Example Request**
 
-### `POST /query`
-Performs vector semantic retrieval over stored chunks and generates a grounded response with source citations.
-
-**Request Body:**
 ```json
 {
   "question": "What does Turium AI build?",
@@ -285,323 +355,378 @@ Performs vector semantic retrieval over stored chunks and generates a grounded r
 }
 ```
 
-**Response `200 OK`:**
+**Example Response**
+
 ```json
 {
   "success": true,
   "data": {
     "question": "What does Turium AI build?",
-    "answer": "Turium AI builds autonomous enterprise intelligence platforms utilizing high-performance retrieval-augmented generation and deterministic vector routing [1].",
+    "answer": "The answer based on retrieved knowledge [1].",
     "citations": [
       {
         "citationNumber": 1,
-        "chunkId": "4c3b2812-70b4-4b55-a9f2-211c47285901",
-        "itemId": "e83fbfa2-7b1f-4f81-a951-87a4ff49576c",
-        "title": "Turium AI Architecture Note",
+        "chunkId": "example-chunk-id",
+        "itemId": "example-item-id",
+        "title": "Architecture Note",
         "sourceType": "note",
         "sourceUrl": null
       }
     ],
-    "sources": [
-      {
-        "citationNumber": 1,
-        "chunkId": "4c3b2812-70b4-4b55-a9f2-211c47285901",
-        "itemId": "e83fbfa2-7b1f-4f81-a951-87a4ff49576c",
-        "chunkIndex": 0,
-        "title": "Turium AI Architecture Note",
-        "sourceType": "note",
-        "sourceUrl": null,
-        "content": "Turium AI builds autonomous enterprise intelligence platforms...",
-        "similarity": 0.884
-      }
-    ],
+    "sources": [],
     "model": "gpt-4o-mini",
     "processingTimeMs": 285
   }
 }
 ```
 
----
+*The above is an illustrative response structure.*
 
-### `DELETE /items/:id`
-Deletes a saved item. Associated chunks in the `chunks` table are automatically removed via database foreign-key cascade.
+### 8.5 DELETE /items/:id
 
-**Response `200 OK`:**
-```json
-{
-  "success": true,
-  "message": "Item 'e83fbfa2-7b1f-4f81-a951-87a4ff49576c' and its indexed chunks were permanently removed."
-}
-```
+Deletes a saved item and automatically removes its associated chunks through SQLite foreign-key cascade constraints.
 
 ---
 
 ## 9. Project Folder Structure
 
-```
+```text
 ai-knowledge-inbox/
-├── backend/
-│   ├── src/
-│   │   ├── config/
-│   │   │   └── index.ts                 # Environment variables and defaults
-│   │   ├── database/
-│   │   │   ├── schema.ts                # SQLite DDL with WAL & foreign keys
-│   │   │   └── db.ts                    # SQLite connection & typed data access
-│   │   ├── services/
-│   │   │   ├── ingestion.service.ts     # Note & URL parsing (Cheerio, SSRF checks)
-│   │   │   ├── embedding.service.ts     # OpenAI & deterministic local vectorizer
-│   │   │   ├── vector.service.ts        # In-memory cosine similarity ranking
-│   │   │   └── rag.service.ts           # Context assembly & grounded LLM prompt
-│   │   ├── controllers/
-│   │   │   ├── ingestion.controller.ts  # POST /ingest handler
-│   │   │   ├── item.controller.ts       # GET & DELETE /items handlers
-│   │   │   ├── query.controller.ts      # POST /query RAG handler
-│   │   │   └── health.controller.ts     # GET /health handler
-│   │   ├── routes/
-│   │   │   ├── index.ts                 # Master router mounting /health & modules
-│   │   │   ├── ingestion.routes.ts      # Ingestion routes
-│   │   │   ├── item.routes.ts           # Item management routes
-│   │   │   └── query.routes.ts          # RAG query routes
-│   │   ├── middleware/
-│   │   │   ├── validate.middleware.ts   # Zod body validation
-│   │   │   ├── error.middleware.ts      # Centralized HTTP error handler
-│   │   │   └── logger.middleware.ts     # Structured HTTP access logging
-│   │   ├── utils/
-│   │   │   ├── chunker.ts               # Paragraph-aware text splitter
-│   │   │   ├── similarity.ts            # Dot product & cosine similarity math
-│   │   │   ├── ssrf.ts                  # SSRF prevention & IP range validator
-│   │   │   └── logger.ts                # Structured console logging
-│   │   ├── types/
-│   │   │   └── index.ts                 # Shared backend TypeScript types
-│   │   ├── app.ts                       # Express application factory
-│   │   └── server.ts                    # Server startup and shutdown hooks
-│   ├── tests/
-│   │   ├── chunker.test.ts              # Unit tests for text chunker
-│   │   ├── similarity.test.ts           # Unit tests for vector math
-│   │   ├── ssrf.test.ts                 # Unit tests for SSRF protection
-│   │   ├── rag.test.ts                  # Integration tests for RAG pipeline
-│   │   └── api.test.ts                  # End-to-end REST API tests
-│   ├── package.json
-│   ├── tsconfig.json
-│   └── .env.example
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Sidebar.tsx              # Navigation, quick stats, items list
-│   │   │   ├── WelcomeBanner.tsx        # Hero banner with quick action buttons
-│   │   │   ├── AddNoteModal.tsx         # Modal for ingesting text notes
-│   │   │   ├── AddUrlModal.tsx          # Modal for ingesting URLs with SSRF note
-│   │   │   ├── AskAISection.tsx         # Search bar with example query chips
-│   │   │   ├── AnswerDisplay.tsx        # Grounded answer with clickable [1] pills
-│   │   │   ├── SavedContentList.tsx     # Filterable list of notes/URLs + delete
-│   │   │   ├── ItemDetailModal.tsx      # Full text & chunk inspector modal
-│   │   │   └── SystemStatusModal.tsx    # Technical architecture & health modal
-│   │   ├── hooks/
-│   │   │   ├── useItems.ts              # Custom hook managing saved items
-│   │   │   └── useRAGQuery.ts           # Custom hook managing RAG queries
-│   │   ├── services/
-│   │   │   └── api.ts                   # Frontend API client
-│   │   ├── types/
-│   │   │   └── index.ts                 # Shared frontend TypeScript interfaces
-│   │   ├── App.tsx                      # Root application component
-│   │   ├── main.tsx                     # React DOM entry point
-│   │   └── index.css                    # Tailwind CSS and custom scrollbars
-│   ├── index.html
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── vite.config.ts
-│   └── tailwind.config.js
-├── package.json                         # Root convenience scripts (npm run dev)
-├── .gitignore
-├── .env.example
-└── README.md
+|
+|-- backend/
+|   |-- src/
+|   |   |-- config/
+|   |   |-- database/
+|   |   |   |-- schema.ts
+|   |   |   |-- db.ts
+|   |   |-- services/
+|   |   |   |-- ingestion.service.ts
+|   |   |   |-- embedding.service.ts
+|   |   |   |-- vector.service.ts
+|   |   |   |-- rag.service.ts
+|   |   |-- controllers/
+|   |   |-- routes/
+|   |   |-- middleware/
+|   |   |-- utils/
+|   |   |-- types/
+|   |   |-- app.ts
+|   |   |-- server.ts
+|   |
+|   |-- tests/
+|   |-- package.json
+|   |-- tsconfig.json
+|   |-- .env.example
+|
+|-- frontend/
+|   |-- src/
+|   |   |-- components/
+|   |   |-- hooks/
+|   |   |-- services/
+|   |   |-- types/
+|   |   |-- App.tsx
+|   |   |-- main.tsx
+|   |   |-- index.css
+|   |
+|   |-- index.html
+|   |-- package.json
+|   |-- vite.config.ts
+|   |-- tailwind.config.js
+|
+|-- package.json
+|-- .gitignore
+|-- .env.example
+|-- README.md
 ```
 
 ---
 
-## 10. Installation & Setup Instructions
+## 10. Installation and Setup
 
 ### Prerequisites
-- **Node.js**: v20 or higher (v22+ or v26 recommended).
-- **npm**: v9 or higher.
+
+- Node.js 22 or a compatible version supporting `node:sqlite`.
+- npm 9 or higher.
+- Git.
 
 ### Step 1: Clone the Repository
+
 ```bash
-git clone https://github.com/your-username/ai-knowledge-inbox.git
+git clone https://github.com/keerthana-0712/ai-knowledge-inbox.git
+
 cd ai-knowledge-inbox
 ```
 
-### Step 2: Install All Dependencies
-You can install dependencies for root, backend, and frontend with a single command:
+### Step 2: Install Dependencies
+
+From the project root:
+
 ```bash
 npm run install:all
 ```
-*(Or navigate into `backend` and `frontend` separately and run `npm install`)*
+
+Alternatively, install dependencies separately inside the backend and frontend directories.
 
 ### Step 3: Configure Environment Variables
-Copy `.env.example` to `backend/.env`:
+
+Copy the example environment file:
+
 ```bash
 cp backend/.env.example backend/.env
 ```
 
-Open `backend/.env` and optionally configure your OpenAI API key:
+Configure the environment variables in `backend/.env`:
+
 ```env
 PORT=5000
 NODE_ENV=development
+
 CORS_ORIGIN=http://localhost:5173
+
 DATABASE_PATH=./data/knowledge_inbox.db
 
-# Optional: Add your OpenAI API key to use text-embedding-3-small and gpt-4o-mini
-# If omitted, the app runs automatically in deterministic local vector mode!
+# Optional OpenAI configuration
 OPENAI_API_KEY=your_openai_api_key_here
 OPENAI_BASE_URL=https://api.openai.com/v1
+
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 OPENAI_CHAT_MODEL=gpt-4o-mini
 
 CHUNK_SIZE=600
 CHUNK_OVERLAP=100
+
 MAX_RETRIEVAL_CHUNKS=5
 MIN_SIMILARITY_THRESHOLD=0.15
 ```
 
+**Note:** OpenAI configuration is optional. Without an API key, the application uses its local fallback engine.
+
+Never commit actual API keys or private environment files to GitHub.
+
 ---
 
-## 11. How to Run Frontend and Backend
+## 11. Running the Application
 
-### Option A: Run Both Simultaneously (Recommended)
-From the project root directory, run:
+### Option A: Run Both Services Together
+
+From the root directory:
+
 ```bash
 npm run dev
 ```
-This runs `concurrently` to start:
-- **Backend API**: `http://localhost:5000`
-- **Frontend App**: `http://localhost:5173`
 
-### Option B: Run Individually
-**Terminal 1 (Backend):**
+Expected development addresses:
+
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:5000 |
+
+### Option B: Run Services Individually
+
+**Terminal 1 – Backend**
+
 ```bash
 cd backend
 npm run dev
 ```
 
-**Terminal 2 (Frontend):**
+**Terminal 2 – Frontend**
+
 ```bash
 cd frontend
 npm run dev
 ```
 
-Open your browser at **`http://localhost:5173`**.
+Open the application:
+
+http://localhost:5173
 
 ---
 
-## 12. Running Automated Tests
+## 12. Automated Testing
 
-Run the full automated test suite (27 tests across 5 test suites):
+The project includes a test suite covering the main application logic and REST API functionality.
+
+The documented test coverage includes:
+
+| Test Suite | Coverage |
+|---|---|
+| similarity.test.ts | Vector mathematics and cosine similarity |
+| chunker.test.ts | Text chunking and contextual overlap |
+| ssrf.test.ts | URL validation and SSRF protection |
+| rag.test.ts | Ingestion, retrieval, grounding and deletion |
+| api.test.ts | REST API integration tests |
+
+**Documented test count:** 27 tests across 5 test suites.
+
+Run the tests:
+
 ```bash
 npm test
 ```
-*(or `cd backend && npm test`)*
 
-### Test Results Breakdown:
-- `similarity.test.ts`: Dot product, magnitude, orthogonal vectors, zero vector handling.
-- `chunker.test.ts`: Single chunk threshold, paragraph preservation, sliding window overlap.
-- `ssrf.test.ts`: Safe public URL validation, localhost rejection, private subnet (10.x, 192.168.x, 172.x) and cloud metadata rejection.
-- `rag.test.ts`: End-to-end note ingestion, vector retrieval ranking, citation formatting `[1]`, and cascade deletion.
-- `api.test.ts`: HTTP integration testing `/health`, `/ingest`, `/items`, `/query`, and `/items/:id`.
+Or:
 
----
+```bash
+cd backend
+npm test
+```
 
-## 13. Technical Decisions & Trade-Offs
-
-### 1. Why SQLite Was Selected
-- **Zero-ops & Self-Contained:** SQLite requires no Docker daemon, no background service, and no separate cluster. The database is a single portable file on disk.
-- **ACID Transactions & Foreign Keys:** Full relational integrity with `ON DELETE CASCADE` ensuring clean deletion of associated chunk vectors when an item is removed.
-- **Node.js Native Integration:** Supported out of the box in modern Node.js (`node:sqlite`), eliminating C++ compilation errors on different operating systems.
-- **WAL Mode (`PRAGMA journal_mode = WAL`):** Enables non-blocking concurrent reads while writes take place.
-
-### 2. Chunking Strategy Rationale
-- **Target Size (~600 characters / ~100–120 words):** In vector retrieval, larger chunks dilute semantic specificity (lowering cosine similarity), while tiny chunks lose essential context. A ~600 character window captures an atomic, coherent factual thought.
-- **Paragraph & Sentence Boundaries:** Rather than arbitrarily splitting at fixed character counts, the algorithm respects double newlines (`\n\n`) and sentence terminators (`.!?`).
-- **Contextual Overlap (~100 characters):** Ensures qualifying phrases and transitional logic spanning across boundaries remain attached to both adjacent chunks.
-
-### 3. Why Cosine Similarity Over SQLite Chunks
-- In a personal knowledge inbox (typically hundreds to low thousands of notes/URLs, resulting in ~1,000–10,000 chunks), computing cosine similarity in Node.js takes **under 5 milliseconds**.
-- Formula:
-  $$\cos(\theta) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\|_2 \|\mathbf{v}\|_2}$$
-- Because embeddings are pre-normalized to unit length ($\|\mathbf{v}\|_2 = 1$), cosine similarity simplifies directly to an $O(d)$ dot product:
-  $$\cos(\theta) = \sum_{i=1}^d u_i v_i$$
-- Calculating 5,000 dot products of 1536-dimensional vectors in modern V8 JIT takes $< 10\text{ ms}$, rendering external vector infrastructure completely unnecessary.
-
-### 4. Why an External Vector Database is Unnecessary Initially
-- External vector databases (Pinecone, Qdrant, Milvus, Weaviate) introduce network latency, authentication overhead, infrastructure management, and recurring financial costs.
-- For single-user knowledge management, keeping vectors colocated with metadata in SQLite provides instant consistency, atomic rollbacks, zero network hops, and trivial backups (copying a single `.db` file).
+*Verify the actual test output before reporting that all 27 tests pass.*
 
 ---
 
-## 14. What Breaks at Scale & Production Path
+## 13. Technical Decisions and Trade-Offs
 
-### What Breaks as Data Scales:
-1. **Memory & CPU for In-Memory Scan:** When the dataset grows past 100,000 chunks, an exhaustive $O(N)$ linear scan of all embeddings in memory will start adding 100–300ms of latency per query.
-2. **Process Memory Footprint:** Loading all vectors into memory during query time consumes tens of megabytes of RAM.
-3. **Single-Node Storage:** SQLite is tied to a local file system; multiple horizontally scaled web server instances cannot easily write to the same SQLite file.
+### 13.1 Why SQLite?
 
-### Required Changes for Production Multi-Tenant Deployment:
-1. **PostgreSQL with `pgvector`:**
-   - Migrate storage to PostgreSQL.
-   - Use `HNSW` (Hierarchical Navigable Small World) or `IVFFlat` indexes in `pgvector` for sub-millisecond approximate nearest neighbor (ANN) retrieval over millions of embeddings.
-2. **Asynchronous Background Ingestion Queue:**
-   - Decouple URL fetching and embedding generation from the HTTP request cycle using **BullMQ / Redis**.
-   - Respond immediately with `202 Accepted` and stream status updates to the client via WebSockets or Server-Sent Events (SSE).
-3. **Embedding Caching:**
-   - Cache hash digests of content chunks in Redis to avoid re-generating embeddings for identical text paragraphs.
-4. **Authentication & Multi-Tenancy:**
-   - Introduce JWT / OAuth2 authentication with Row-Level Security (RLS) isolating each tenant's knowledge vectors.
-5. **Rate Limiting & Token Budgeting:**
-   - Add express-rate-limit and token usage counters per user to prevent API quota exhaustion.
-6. **Observability:**
-   - Integrate OpenTelemetry for tracing end-to-end RAG latency, retrieval precision, and LLM token usage.
+SQLite was selected to keep the application lightweight and self-contained.
+
+Advantages:
+
+- No external database server required.
+- No Docker infrastructure required.
+- ACID-compliant transactions.
+- Foreign-key constraints and cascade deletion.
+- Portable file-based storage.
+- WAL mode for improved read/write concurrency.
+
+It is appropriate for the single-user scope and relatively small knowledge collections targeted by this assessment.
+
+### 13.2 Why Paragraph-Aware Chunking?
+
+The application uses a target chunk size of approximately 600 characters with 100-character overlap.
+
+The strategy:
+
+- Preserves paragraph boundaries wherever possible.
+- Respects sentence boundaries.
+- Maintains contextual continuity between adjacent chunks.
+- Reduces loss of important information during retrieval.
+
+### 13.3 Why Cosine Similarity?
+
+Cosine similarity measures the directional similarity between query and document embeddings.
+
+For a single-user knowledge inbox containing a relatively small number of chunks, an in-memory similarity scan avoids the operational complexity of an external vector database.
+
+### 13.4 Why Not Use an External Vector Database?
+
+External systems such as Pinecone, Qdrant, Milvus, and Weaviate introduce additional infrastructure, network communication, authentication, and operational overhead.
+
+For the scope of this application, SQLite provides:
+
+- Local vector storage.
+- Consistent metadata and embedding management.
+- No additional network dependency.
+- Simplified backups and deployment.
+
+---
+
+## 14. What Breaks at Scale and the Production Path
+
+The current architecture is intentionally optimized for a lightweight, single-user application.
+
+However, several limitations would appear as the system grows.
+
+### Potential Scaling Bottlenecks
+
+1. **Vector Retrieval:** Exhaustive in-memory similarity scans become more expensive as the number of chunks increases.
+2. **Memory Consumption:** Loading large embedding collections into memory increases process memory usage.
+3. **Single-Node Storage:** A local SQLite database is not designed for unrestricted horizontal scaling across multiple independent application instances.
+
+### Proposed Production Improvements
+
+**1. PostgreSQL with pgvector**
+
+- Migrate persistent storage to PostgreSQL.
+- Use vector indexing strategies such as HNSW or IVFFlat.
+- Support efficient approximate nearest-neighbor retrieval.
+
+**2. Background Processing**
+
+- Introduce BullMQ and Redis for asynchronous ingestion.
+- Move expensive URL processing and embedding generation into background workers.
+- Provide processing status through Server-Sent Events or WebSockets.
+
+**3. Embedding Caching**
+
+- Cache content hashes and generated embeddings.
+- Avoid unnecessary embedding generation for duplicate content.
+
+**4. Authentication and Multi-Tenancy**
+
+- Introduce JWT or OAuth-based authentication.
+- Isolate user data.
+- Implement appropriate tenant-level authorization.
+
+**5. Rate Limiting and Token Budgeting**
+
+- Introduce API rate limiting.
+- Track token consumption.
+- Control AI API usage per user.
+
+**6. Observability**
+
+- Integrate OpenTelemetry.
+- Monitor retrieval performance.
+- Track generation latency and token usage.
+- Improve debugging and production monitoring.
 
 ---
 
 ## 15. Known Limitations
 
-1. **Single-User Scope:** Does not include user accounts, logins, or multi-tenant authorization rules (as requested by the recruitment specification).
-2. **JavaScript-Rendered Pages:** The URL scraper uses standard HTTP fetch and Cheerio. Highly dynamic Single Page Apps (SPAs) that require a full headless browser (e.g. Puppeteer/Playwright) to execute client-side JavaScript will return only initial HTML.
-3. **Paywalled Content:** Webpages behind logins or anti-scraping Cloudflare challenges cannot be extracted.
+1. **Single-User Application:** Authentication, user accounts, and multi-tenant authorization are outside the current implementation scope.
+2. **JavaScript-Rendered Websites:** The scraper uses native HTTP fetching and Cheerio. Websites requiring client-side JavaScript execution may not return complete article content.
+3. **Paywalled Content:** Websites requiring authentication or protected access may prevent successful extraction.
+4. **Local Vector Search:** In-memory exhaustive vector scanning is not intended for very large datasets.
 
 ---
 
 ## 16. Future Improvements
 
-- **Hybrid Search:** Combine BM25 full-text keyword search (`sqlite-fts5`) with vector cosine similarity using Reciprocal Rank Fusion (RRF).
-- **Document Ingestion (PDF / DOCX):** Support dragging and dropping PDF and Word files with `pdf-parse`.
-- **Reranking:** Incorporate a cross-encoder reranker (e.g. Cohere Rerank or BGE Reranker) over the top 15 candidate chunks before passing the top 4 to the LLM.
-- **Conversation Threading:** Store conversation histories to allow multi-turn follow-up questions referencing previous answers.
+Potential enhancements include:
+
+- **Hybrid Search:** Combine keyword-based BM25 search with vector similarity using Reciprocal Rank Fusion.
+- **Document Ingestion:** Support PDF and DOCX uploads.
+- **Reranking:** Add cross-encoder reranking to improve retrieval relevance.
+- **Conversation History:** Support multi-turn conversations using previous queries and retrieved context.
+- **Advanced Retrieval:** Explore metadata filtering and more efficient vector indexing.
 
 ---
 
-## 17. Assessment Requirement Verification Checklist
+## 17. Assessment Requirement Verification
 
-- [x] **Single-user personal knowledge inbox without authentication bloat.**
-- [x] **Add text notes** (Title, plain-text content, timestamp, source type `"note"`).
-- [x] **Add URLs** (Server-side fetch, noise stripping, readability extraction, source type `"url"`).
-- [x] **SSRF Protection** (Blocks localhost, private subnets, and cloud metadata IPs).
-- [x] **Paragraph-aware chunking strategy** (~600 chars, 100-char overlap, boundary preserved).
-- [x] **Vector embeddings generation** (OpenAI `text-embedding-3-small` with local fallback vectorizer).
-- [x] **SQLite vector storage** (`items` and `chunks` tables with `ON DELETE CASCADE` and `WAL`).
-- [x] **Cosine similarity semantic search** (Top 4-5 relevant chunks retrieved).
-- [x] **RAG pipeline with strict grounding** (Answers strictly from context; no hallucination).
-- [x] **Numbered citations & source snippets** (`[1]`, `[2]` clickable, jumping to source cards with match % and content).
-- [x] **REST APIs implemented:**
-  - `POST /ingest`
-  - `GET /items`
-  - `POST /query`
-  - `GET /health`
-  - `DELETE /items/:id`
-- [x] **React + TypeScript + Vite + Tailwind CSS frontend** inspired by Linear / Notion.
-- [x] **29 automated tests passing** across 6 test suites.
-- [x] **Production-style README** detailing architecture, trade-offs, and scaling bottlenecks.
+The following checklist reflects the documented implementation scope.
+
+- [x] Single-user personal knowledge inbox.
+- [x] Add and save text notes.
+- [x] Ingest website URLs.
+- [x] Server-side HTML extraction.
+- [x] SSRF protection.
+- [x] Paragraph-aware text chunking.
+- [x] Contextual chunk overlap.
+- [x] OpenAI embedding integration.
+- [x] Local embedding fallback.
+- [x] SQLite vector storage.
+- [x] Cosine similarity retrieval.
+- [x] Top-K semantic search.
+- [x] Grounded RAG pipeline.
+- [x] Numbered source citations.
+- [x] Interactive source snippets.
+- [x] REST API implementation.
+- [x] React and TypeScript frontend.
+- [x] Responsive user interface.
+- [x] Automated test coverage.
+- [x] Technical architecture and trade-off documentation.
 
 ---
 
-**Built with pride for Turium AI.**
+## 18. Repository
+
+**GitHub:** https://github.com/keerthana-0712/ai-knowledge-inbox
+
+---
+
+**Built with pride for Turium AI (Enterprise AI).**
