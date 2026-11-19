@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
-import { embeddingService } from './embedding.service.js';
+import { embeddingService, EmbeddingService } from './embedding.service.js';
 import { vectorService, ScoredChunk } from './vector.service.js';
 import { QueryResponse, Citation, SourceSnippet } from '../types/index.js';
 
@@ -36,14 +36,16 @@ class RAGService {
     const queryVector = await embeddingService.generateEmbedding(trimmedQuestion);
     const retrievedChunks = vectorService.findSimilarChunks(
       queryVector,
-      topK || config.chunking.maxRetrievalChunks
+      topK || config.chunking.maxRetrievalChunks,
+      trimmedQuestion
     );
 
-    if (retrievedChunks.length === 0) {
+    // If no chunks were retrieved or the best similarity is below minimum grounding threshold
+    if (retrievedChunks.length === 0 || retrievedChunks[0].similarity < 0.48) {
       return {
         question: trimmedQuestion,
         answer:
-          'No relevant documents or saved URLs were found to answer this question. Add related content to your knowledge inbox first.',
+          'Based on your saved knowledge, there is not enough information to answer this question.',
         citations: [],
         sources: [],
         model: this.getModelName(),
@@ -165,7 +167,7 @@ Grounded Answer (with citations):`;
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, '')
       .split(/\s+/)
-      .filter((w) => w.length > 2);
+      .filter((w) => w.length > 2 && !EmbeddingService.STOP_WORDS.has(w));
 
     const relevantSentences: { text: string; citationNum: number; score: number }[] = [];
 
@@ -186,22 +188,18 @@ Grounded Answer (with citations):`;
         }
 
         if (matches > 0) {
+          const rankBoost = 1 / Math.sqrt(source.citationNumber);
           relevantSentences.push({
             text: sentence,
             citationNum: source.citationNumber,
-            score: matches * source.similarity,
+            score: matches * source.similarity * rankBoost,
           });
         }
       }
     }
 
     if (relevantSentences.length === 0) {
-      // Return highest similarity source preview as direct citation
-      const topSource = sources[0];
-      return `According to your saved knowledge in "${topSource.title}", ${topSource.content.slice(
-        0,
-        220
-      )}... [${topSource.citationNumber}]`;
+      return 'Based on your saved knowledge, there is not enough information to answer this question.';
     }
 
     // Sort by relevance score

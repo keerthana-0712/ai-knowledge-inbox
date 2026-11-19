@@ -67,4 +67,10 @@ export const api = {
     const res = await fetch(`${API_BASE}/health`);
     return handleResponse<HealthInfo>(res);
   },
+
+  async getLogs(): Promise<Array<{ timestamp: string; level: string; message: string; meta?: any }>> {
+    const res = await fetch(`${API_BASE}/logs`);
+    const data = await res.json().catch(() => ({ logs: [] }));
+    return data.logs || [];
+  },
 };

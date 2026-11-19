@@ -599,7 +599,7 @@ npm test
   - `GET /health`
   - `DELETE /items/:id`
 - [x] **React + TypeScript + Vite + Tailwind CSS frontend** inspired by Linear / Notion.
-- [x] **27 automated tests passing** across 5 test suites.
+- [x] **29 automated tests passing** across 6 test suites.
 - [x] **Production-style README** detailing architecture, trade-offs, and scaling bottlenecks.
 
 ---

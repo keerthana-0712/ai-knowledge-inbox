@@ -38,7 +38,7 @@
   background: #cac5ba;
 }
 
-/* Turium interactive citation badge */
+/* Interactive citation badge */
 .citation-pill {
   display: inline-flex;
   align-items: center;
@@ -54,155 +54,28 @@
   margin: 0 2px;
   cursor: pointer;
   vertical-align: baseline;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.15s ease;
 }
 
 .citation-pill:hover {
   background-color: #6100ff;
   color: #ffffff;
   border-color: #6100ff;
-  transform: translateY(-1.5px) scale(1.05);
-  box-shadow: 0 4px 12px rgba(97, 0, 255, 0.3);
+  transform: translateY(-1px);
 }
 
-/* Apple & ChatGPT Signature Animation Physics */
-@keyframes appleBloom {
-  0% {
+/* Minimal modal enter animation */
+@keyframes modalEnter {
+  from {
     opacity: 0;
-    filter: blur(12px);
-    transform: scale(0.94) translateY(12px);
+    transform: scale(0.98);
   }
-  100% {
+  to {
     opacity: 1;
-    filter: blur(0px);
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes textShimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes orbFloat {
-  0%, 100% {
-    transform: translateY(0px) scale(1) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-8px) scale(1.04) rotate(3deg);
-  }
-}
-
-@keyframes orbPulse {
-  0%, 100% {
-    opacity: 0.45;
     transform: scale(1);
   }
-  50% {
-    opacity: 0.85;
-    transform: scale(1.15);
-  }
-}
-
-@keyframes chatgptHalo {
-  0% {
-    box-shadow: 0 0 0 0 rgba(97, 0, 255, 0.4), 0 0 30px rgba(97, 0, 255, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 0 14px rgba(97, 0, 255, 0), 0 0 50px rgba(97, 0, 255, 0.35);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(97, 0, 255, 0), 0 0 30px rgba(97, 0, 255, 0.2);
-  }
-}
-
-@keyframes modalSpringIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.94) translateY(14px);
-    filter: blur(6px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0);
-  }
-}
-
-/* Staggered Apple-grade page entrance */
-.animate-apple-bloom {
-  animation: appleBloom 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-text-shimmer {
-  background: linear-gradient(
-    90deg,
-    #111114 0%,
-    #111114 25%,
-    #6100ff 50%,
-    #9d4edd 70%,
-    #111114 90%,
-    #111114 100%
-  );
-  background-size: 200% auto;
-  color: transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: textShimmer 4s linear infinite;
-}
-
-.animate-orb-float {
-  animation: orbFloat 6s ease-in-out infinite;
-}
-
-.animate-orb-pulse {
-  animation: orbPulse 4s ease-in-out infinite;
-}
-
-.animate-chatgpt-halo {
-  animation: chatgptHalo 3s infinite cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-modal-enter {
-  animation: modalSpringIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-welcome-1 {
-  animation: appleBloom 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-welcome-2 {
-  animation: appleBloom 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
-  opacity: 0;
-}
-
-.animate-welcome-3 {
-  animation: appleBloom 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-  opacity: 0;
-}
-
-/* Glassmorphism utility classes */
-.apple-glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.04), 0 2px 8px -2px rgba(0, 0, 0, 0.02);
-}
-
-.apple-card {
-  background: #ffffff;
-  border: 1px solid #e8e4dd;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 6px 16px -4px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.apple-card:hover {
-  transform: translateY(-2px);
-  border-color: #dcd6c8;
-  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.07), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+  animation: modalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

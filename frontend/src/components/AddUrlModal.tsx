@@ -96,7 +96,7 @@ export const AddUrlModal: React.FC<AddUrlModalProps> = ({ isOpen, onClose, onSuc
             </label>
             <input
               type="text"
-              placeholder="e.g., Turium Architecture Whitepaper"
+              placeholder="e.g., React Architecture Guide"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={isSubmitting}

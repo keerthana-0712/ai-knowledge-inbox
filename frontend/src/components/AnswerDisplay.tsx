@@ -8,7 +8,8 @@ import {
   ChevronUp, 
   Copy,
   Check,
-  Percent
+  Percent,
+  Eye
 } from 'lucide-react';
 import { QueryResult } from '../types';
 import { sanitizeDisplay } from '../utils/text';
@@ -16,9 +17,10 @@ import { sanitizeDisplay } from '../utils/text';
 interface AnswerDisplayProps {
   result: QueryResult;
   onClear: () => void;
+  onViewItem?: (itemId: string) => void;
 }
 
-export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear }) => {
+export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear, onViewItem }) => {
   const [copied, setCopied] = useState(false);
   const [highlightedCitation, setHighlightedCitation] = useState<number | null>(null);
   const [expandedSnippets, setExpandedSnippets] = useState<Record<number, boolean>>({});
@@ -170,17 +172,37 @@ export const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ result, onClear })
                         ) : (
                           <Globe className="w-3.5 h-3.5 text-[#0284c7] flex-shrink-0" />
                         )}
-                        <span className="text-xs font-semibold text-[#111114] truncate">
-                          {source.title}
-                        </span>
+                        {onViewItem ? (
+                          <button
+                            onClick={() => onViewItem(source.itemId)}
+                            className="text-xs font-semibold text-[#111114] hover:text-[#6100ff] truncate text-left transition-colors"
+                            title="Open saved document"
+                          >
+                            {source.title}
+                          </button>
+                        ) : (
+                          <span className="text-xs font-semibold text-[#111114] truncate">
+                            {source.title}
+                          </span>
+                        )}
                       </div>
+
+                      {onViewItem && (
+                        <button
+                          onClick={() => onViewItem(source.itemId)}
+                          className="p-1 rounded text-[#78757d] hover:text-[#6100ff] hover:bg-[#f5f0ff] transition-colors flex-shrink-0"
+                          title="Open document details"
+                        >
+                          <Eye className="w-3 h-3" />
+                        </button>
+                      )}
 
                       {source.sourceUrl && (
                         <a
                           href={source.sourceUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[#78757d] hover:text-[#0284c7] transition-colors"
+                          className="text-[#78757d] hover:text-[#0284c7] transition-colors flex-shrink-0"
                           title="Open original URL"
                         >
                           <ExternalLink className="w-3 h-3" />

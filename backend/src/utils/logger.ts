@@ -5,11 +5,29 @@ export enum LogLevel {
   ERROR = 'ERROR',
 }
 
+export interface LogEntry {
+  timestamp: string;
+  level: LogLevel;
+  message: string;
+  meta?: unknown;
+}
+
 class Logger {
+  private recentLogs: LogEntry[] = [];
+  private readonly maxLogs = 60;
+
   private formatMessage(level: LogLevel, message: string, meta?: unknown): string {
     const timestamp = new Date().toISOString();
+    this.recentLogs.push({ timestamp, level, message, meta });
+    if (this.recentLogs.length > this.maxLogs) {
+      this.recentLogs.shift();
+    }
     const metaStr = meta ? ` ${JSON.stringify(meta)}` : '';
     return `[${timestamp}] [${level}] ${message}${metaStr}`;
+  }
+
+  getRecentLogs(): LogEntry[] {
+    return [...this.recentLogs];
   }
 
   debug(message: string, meta?: unknown): void {

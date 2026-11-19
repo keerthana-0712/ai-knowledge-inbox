@@ -3,7 +3,7 @@ import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 import { magnitude } from '../utils/similarity.js';
 
-class EmbeddingService {
+export class EmbeddingService {
   private openai: OpenAI | null = null;
   private isUsingOpenAI: boolean = false;
 
@@ -61,6 +61,23 @@ class EmbeddingService {
     return texts.map((t) => this.generateLocalDeterministicEmbedding(t));
   }
 
+  public static readonly STOP_WORDS = new Set([
+    'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and', 'any', 'are', 'as', 'at',
+    'be', 'because', 'been', 'before', 'being', 'below', 'between', 'both', 'but', 'by',
+    'can', 'could', 'did', 'do', 'does', 'doing', 'down', 'during',
+    'each', 'few', 'for', 'from', 'further',
+    'had', 'has', 'have', 'having', 'he', 'her', 'here', 'hers', 'herself', 'him', 'himself', 'his', 'how',
+    'i', 'if', 'in', 'into', 'is', 'it', 'its', 'itself',
+    'just', 'me', 'more', 'most', 'my', 'myself',
+    'no', 'nor', 'not', 'now',
+    'of', 'off', 'on', 'once', 'only', 'or', 'other', 'our', 'ours', 'ourselves', 'out', 'over', 'own',
+    'same', 'she', 'should', 'so', 'some', 'such',
+    'than', 'that', 'the', 'their', 'theirs', 'them', 'themselves', 'then', 'there', 'these', 'they', 'this', 'those', 'through', 'to', 'too',
+    'under', 'until', 'up', 'very',
+    'was', 'we', 'were', 'what', 'when', 'where', 'which', 'while', 'who', 'whom', 'why', 'with', 'would',
+    'you', 'your', 'yours', 'yourself', 'yourselves'
+  ]);
+
   private generateLocalDeterministicEmbedding(text: string): number[] {
     const DIMENSIONS = 256;
     const vector = new Array<number>(DIMENSIONS).fill(0);
@@ -71,14 +88,28 @@ class EmbeddingService {
       return vector;
     }
 
-    // Unigrams and bigrams
-    for (let i = 0; i < tokens.length; i++) {
-      const unigram = tokens[i];
-      this.accumulateHash(unigram, vector, DIMENSIONS, 1.0);
+    // Filter out stop words for high topical selectivity
+    const contentTokens = tokens.filter((t) => !EmbeddingService.STOP_WORDS.has(t));
+    const activeTokens = contentTokens.length > 0 ? contentTokens : tokens;
 
-      if (i < tokens.length - 1) {
-        const bigram = `${tokens[i]}_${tokens[i + 1]}`;
-        this.accumulateHash(bigram, vector, DIMENSIONS, 1.5);
+    // Word tokens, bigrams, and character subword n-grams (FastText style)
+    for (let i = 0; i < activeTokens.length; i++) {
+      const word = activeTokens[i];
+      this.accumulateHash(word, vector, DIMENSIONS, 1.0);
+
+      // Subword character n-grams (handles plurals/stems like grocery vs groceries)
+      if (word.length >= 4) {
+        for (let len = 3; len <= 5; len++) {
+          for (let j = 0; j <= word.length - len; j++) {
+            const sub = word.slice(j, j + len);
+            this.accumulateHash(sub, vector, DIMENSIONS, 0.4);
+          }
+        }
+      }
+
+      if (i < activeTokens.length - 1) {
+        const bigram = `${activeTokens[i]}_${activeTokens[i + 1]}`;
+        this.accumulateHash(bigram, vector, DIMENSIONS, 1.2);
       }
     }
 

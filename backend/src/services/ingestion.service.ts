@@ -122,7 +122,7 @@ class IngestionService {
         signal: controller.signal,
         headers: {
           'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AI-Knowledge-Inbox/1.0 (+https://turium.ai)',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AI-Knowledge-Inbox/1.0',
           Accept: 'text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.8',
         },
       });
@@ -223,7 +223,7 @@ class IngestionService {
     }
 
     logger.info(`[IngestionService] Generating embeddings for ${textChunks.length} chunks...`);
-    const chunkContents = textChunks.map((c) => c.content);
+    const chunkContents = textChunks.map((c) => `${title}: ${c.content}`);
     const embeddings = await embeddingService.generateEmbeddings(chunkContents);
 
     const item: Item = {

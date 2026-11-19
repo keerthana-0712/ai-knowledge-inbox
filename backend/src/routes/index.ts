@@ -3,6 +3,7 @@ import ingestionRoutes from './ingestion.routes.js';
 import itemRoutes from './item.routes.js';
 import queryRoutes from './query.routes.js';
 import { healthHandler } from '../controllers/health.controller.js';
+import { logger } from '../utils/logger.js';
 
 const router = Router();
 
@@ -25,6 +26,14 @@ router.get('/', (_req, res) => {
 
 // Health check endpoint
 router.get('/health', healthHandler);
+
+// Structured logs inspection endpoint
+router.get('/logs', (_req, res) => {
+  res.json({
+    success: true,
+    logs: logger.getRecentLogs(),
+  });
+});
 
 // Ingestion endpoints
 router.use('/', ingestionRoutes);

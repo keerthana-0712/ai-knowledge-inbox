@@ -2,6 +2,7 @@
   "name": "ai-knowledge-inbox-backend",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "Backend API for AI Knowledge Inbox with semantic search and RAG",
   "main": "src/server.ts",
   "scripts": {
